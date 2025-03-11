@@ -4,16 +4,22 @@ pragma solidity ^0.8.4;
 import {Receiver} from "@solady/accounts/Receiver.sol";
 import {ECDSA} from "@solady/utils/ECDSA.sol";
 import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
-import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
 import {PackedUserOperation} from "@account-abstraction/interfaces/PackedUserOperation.sol";
 import {Exec} from "@account-abstraction/utils/Exec.sol";
 import "@account-abstraction/core/Helpers.sol";
 
+import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import {IAccount} from "@account-abstraction/interfaces/IAccount.sol";
+
 /**
  * @title JustaNameAccount
- * @notice This contract is to be usedt with EIP-7702 (for batching) and supports ERC-4337 (for gas sponsoring)
+ * @notice This contract is to be used with EIP-7702 (for batching) and supports ERC-4337 (for gas sponsoring)
  */
-contract JustaNameAccount is BaseAccount, Receiver {
+contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
     error JustaNameAccount_NotOwnerorEntryPoint();
     error JustaNameAccount_ExecuteError(uint256 index, bytes error);
 
@@ -64,13 +70,16 @@ contract JustaNameAccount is BaseAccount, Receiver {
         }
     }
 
+    /**
+     * @notice Returns entrypoint used by this account
+     */
     function entryPoint() public view virtual override returns (IEntryPoint) {
         return i_entryPoint;
     }
 
     /**
      * @notice Validates the signature of the account.
-     * @param hash The hash of the message to be signed.
+     * @param hash The hash of the signed message.
      * @param signature The signature of the message.
      * @return result The result of the signature validation.
      */
@@ -81,6 +90,16 @@ contract JustaNameAccount is BaseAccount, Receiver {
             // We use `0xffffffff` for invalid, in convention with the reference implementation.
             result := shl(224, or(0x1626ba7e, sub(0, iszero(success))))
         }
+    }
+
+    /**
+     * @notice Checks if the contract supports an interface.
+     * @param id The interface ID.
+     * @return Whether the contract supports the interface.
+     */
+    function supportsInterface(bytes4 id) public pure virtual returns (bool) {
+        return id == type(IERC165).interfaceId || id == type(IAccount).interfaceId || id == type(IERC1271).interfaceId
+            || id == type(IERC1155Receiver).interfaceId || id == type(IERC721Receiver).interfaceId;
     }
 
     /**
@@ -107,7 +126,9 @@ contract JustaNameAccount is BaseAccount, Receiver {
         return ECDSA.recoverCalldata(hash, signature) == address(this);
     }
 
-    // This function makes sure the caller is the owner or the entry point
+    /**
+     * @notice This function makes sure the caller is the owner or the entrypoint
+     */
     function _requireForExecute() internal view {
         require(
             msg.sender == address(this) || msg.sender == address(entryPoint()), JustaNameAccount_NotOwnerorEntryPoint()
