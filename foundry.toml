@@ -1,10 +1,12 @@
 [profile.default]
 src = "src"
 out = "out"
+evm_version = "prague"
 libs = ["lib"]
 remappings = [
   '@account-abstraction/=lib/account-abstraction/contracts/',
-  '@solady/=lib/solady/src/'
+  '@solady/=lib/solady/src/',
+  '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
 ]
 
 optimizer = true
