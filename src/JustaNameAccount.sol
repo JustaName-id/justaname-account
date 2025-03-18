@@ -23,12 +23,6 @@ contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
     error JustaNameAccount_NotOwnerorEntryPoint();
     error JustaNameAccount_ExecuteError(uint256 index, bytes error);
 
-    struct Call {
-        address target;
-        uint256 value;
-        bytes data;
-    }
-
     IEntryPoint private immutable i_entryPoint;
 
     constructor(address entryPointAddress) {
@@ -38,7 +32,7 @@ contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
     /**
      * @notice execute a single call from the account.
      */
-    function execute(address target, uint256 value, bytes calldata data) external virtual {
+    function execute(address target, uint256 value, bytes calldata data) external virtual override {
         _requireForExecute();
 
         bool success = Exec.call(target, value, data, gasleft());
@@ -53,7 +47,7 @@ contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
      * If the batch reverts, and it contains more than a single call, then wrap the revert with ExecuteError,
      *  to mark the failing call index.
      */
-    function executeBatch(Call[] calldata calls) external virtual {
+    function executeBatch(Call[] calldata calls) external virtual override {
         _requireForExecute();
 
         uint256 callsLength = calls.length;
@@ -129,7 +123,7 @@ contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
     /**
      * @notice This function makes sure the caller is the owner or the entrypoint
      */
-    function _requireForExecute() internal view {
+    function _requireForExecute() internal view override {
         require(
             msg.sender == address(this) || msg.sender == address(entryPoint()), JustaNameAccount_NotOwnerorEntryPoint()
         );
