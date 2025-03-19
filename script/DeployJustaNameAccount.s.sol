@@ -7,7 +7,7 @@ import {JustaNameAccount} from "../src/JustaNameAccount.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 
 contract DeployJustaNameAccount is Script {
-    function run() external returns (JustaNameAccount) {
+    function run() external returns (JustaNameAccount, address) {
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
 
@@ -15,6 +15,6 @@ contract DeployJustaNameAccount is Script {
         JustaNameAccount account = new JustaNameAccount(config.entryPointAddress);
         vm.stopBroadcast();
 
-        return account;
+        return (account, config.entryPointAddress);
     }
 }
