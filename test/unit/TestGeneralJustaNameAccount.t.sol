@@ -6,6 +6,8 @@ import {IAccount} from "@account-abstraction/interfaces/IAccount.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC1155} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
@@ -13,15 +15,40 @@ import {CodeConstants} from "../../script/HelperConfig.s.sol";
 import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
 import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
 
+contract ERC721Mock is ERC721 {
+    constructor() ERC721("ERC721Mock", "E721M") {}
+
+    function mint(address to, uint256 tokenId) public {
+        _mint(to, tokenId);
+    }
+}
+
+contract ERC1155Mock is ERC1155 {
+    constructor() ERC1155("") {}
+
+    function mint(address to, uint256 tokenId, uint256 amount, bytes memory data) public {
+        _mint(to, tokenId, amount, data);
+    }
+}
 contract TestGeneralJustaNameAccount is Test, CodeConstants {
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
 
+    ERC721Mock public erc721Mock;
+    ERC1155Mock public erc1155Mock;
+
     address public entryPointAddress;
+
+    address public NFT_OWNER;
 
     function setUp() public {
         DeployJustaNameAccount deployer = new DeployJustaNameAccount();
         (justaNameAccount, entryPointAddress) = deployer.run();
+
+        NFT_OWNER = makeAddr("nft_owner");
+
+        erc721Mock = new ERC721Mock();
+        erc1155Mock = new ERC1155Mock();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -108,5 +135,45 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
             signature
         );
         assertEq(result, bytes4(0x1626ba7e));
+    }
+
+
+    /*//////////////////////////////////////////////////////////////
+                            RECEIVER TESTS
+    //////////////////////////////////////////////////////////////*/
+    function test_ShouldReceiveERC721Correctly(
+        uint256 tokenId
+    ) public {
+        erc721Mock.mint(NFT_OWNER, tokenId);
+
+        vm.prank(NFT_OWNER);
+        erc721Mock.approve(TEST_ACCOUNT_ADDRESS, tokenId);
+
+        vm.prank(TEST_ACCOUNT_ADDRESS);
+        erc721Mock.safeTransferFrom(NFT_OWNER, TEST_ACCOUNT_ADDRESS, tokenId);
+
+        assertEq(erc721Mock.balanceOf(TEST_ACCOUNT_ADDRESS), 1);
+        
+        vm.prank(TEST_ACCOUNT_ADDRESS);
+        erc721Mock.safeTransferFrom(TEST_ACCOUNT_ADDRESS, NFT_OWNER, tokenId);
+
+        assertEq(erc721Mock.balanceOf(TEST_ACCOUNT_ADDRESS), 0);
+    }
+
+    function test_ShouldReceiveERC1155Correctly(
+        uint256 tokenId,
+        uint256 amount
+    ) public {
+        erc1155Mock.mint(NFT_OWNER, tokenId, amount, bytes(""));
+
+        vm.prank(NFT_OWNER);
+        erc1155Mock.safeTransferFrom(NFT_OWNER, TEST_ACCOUNT_ADDRESS, tokenId, amount, bytes(""));
+
+        assertEq(erc1155Mock.balanceOf(TEST_ACCOUNT_ADDRESS, tokenId), amount);
+
+        vm.prank(TEST_ACCOUNT_ADDRESS);
+        erc1155Mock.safeTransferFrom(TEST_ACCOUNT_ADDRESS, NFT_OWNER, tokenId, amount, bytes(""));
+
+        assertEq(erc1155Mock.balanceOf(TEST_ACCOUNT_ADDRESS, tokenId), 0);
     }
 }
