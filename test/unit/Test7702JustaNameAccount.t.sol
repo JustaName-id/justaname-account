@@ -57,21 +57,20 @@ contract TestJustaNameAccount is Test, CodeConstants {
         assertEq(mockERC20.balanceOf(to), amount);
     }
 
-    // function test_ShouldExecuteCorrectlyWithSponsor(
-    //     uint256 amount
-    // ) public {
-    //     (address BOB_ADDRESS, uint256 BOB_PK) = makeAddrAndKey("bob");
+    function test_ShouldThrowErrorIfSponsoringExecute(
+        uint256 amount
+    ) public {
+        (address BOB_ADDRESS, uint256 BOB_PK) = makeAddrAndKey("bob");
 
-    //     bytes memory data = abi.encodeCall(ERC20Mock.mint, (BOB_ADDRESS, amount));
+        bytes memory data = abi.encodeCall(ERC20Mock.mint, (BOB_ADDRESS, amount));
 
-    //     Vm.SignedDelegation memory signedDelegation = vm.signDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        Vm.SignedDelegation memory signedDelegation = vm.signDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
     
-    //     vm.broadcast(BOB_PK);
-    //     vm.attachDelegation(signedDelegation);
-    //     JustaNameAccount(TEST_ACCOUNT_ADDRESS).execute(address(mockERC20), 0, data);
-
-    //     assertEq(mockERC20.balanceOf(BOB_ADDRESS), amount);
-    // }
+        vm.broadcast(BOB_PK);
+        vm.attachDelegation(signedDelegation);
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerorEntryPoint.selector));
+        JustaNameAccount(TEST_ACCOUNT_ADDRESS).execute(address(mockERC20), 0, data);
+    }
 
 
     /*//////////////////////////////////////////////////////////////
@@ -121,5 +120,36 @@ contract TestJustaNameAccount is Test, CodeConstants {
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).executeBatch(calls);
 
         assertEq(mockERC20.balanceOf(to), 0);
+    }
+
+    function test_ShouldThrowErrorIfSponsoringExecuteBatch(
+        address to,
+        uint256 amount
+    ) public {
+        vm.assume(to != address(0));
+
+        (address BOB_ADDRESS, uint256 BOB_PK) = makeAddrAndKey("bob");
+
+        bytes memory data1 = abi.encodeCall(ERC20Mock.mint, (to, amount));
+        bytes memory data2 = abi.encodeCall(ERC20Mock.burn, (to, amount));
+
+        BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
+        calls[0] = BaseAccount.Call({
+            target: address(mockERC20),
+            value: 0,
+            data: data1
+        });
+        calls[1] = BaseAccount.Call({
+            target: address(mockERC20),
+            value: 0,
+            data: data2
+        });
+        
+        Vm.SignedDelegation memory signedDelegation = vm.signDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        
+        vm.broadcast(BOB_PK);
+        vm.attachDelegation(signedDelegation);
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerorEntryPoint.selector));
+        JustaNameAccount(TEST_ACCOUNT_ADDRESS).executeBatch(calls);
     }
 }
