@@ -1,13 +1,18 @@
 [profile.default]
 src = "src"
 out = "out"
+evm_version = "prague"
 libs = ["lib"]
 remappings = [
   '@account-abstraction/=lib/account-abstraction/contracts/',
-  '@solady/=lib/solady/src/'
+  '@solady/=lib/solady/src/',
+  '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
 ]
 
 optimizer = true
 optimizer_runs = 20000
+
+[fuzz]
+runs = 256
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
