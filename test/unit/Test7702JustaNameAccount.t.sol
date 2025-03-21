@@ -128,7 +128,7 @@ contract TestJustaNameAccount is Test, CodeConstants {
     ) public {
         vm.assume(to != address(0));
 
-        (address BOB_ADDRESS, uint256 BOB_PK) = makeAddrAndKey("bob");
+        (, uint256 BOB_PK) = makeAddrAndKey("bob");
 
         bytes memory data1 = abi.encodeCall(ERC20Mock.mint, (to, amount));
         bytes memory data2 = abi.encodeCall(ERC20Mock.burn, (to, amount));
