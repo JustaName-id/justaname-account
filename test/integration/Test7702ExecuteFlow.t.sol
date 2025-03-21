@@ -3,7 +3,6 @@ pragma solidity ^0.8.4;
 
 import {Test, console, Vm} from "forge-std/Test.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
-import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
 
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {CodeConstants} from "../../script/HelperConfig.s.sol";
@@ -24,27 +23,14 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
         mockERC20 = new ERC20Mock();
     }
 
-    function test_ShouldExecute7702FlowCorrectly(
-        address to,
-        uint256 amount,
-        bytes32 messageHash
-    ) public {
+    function test_ShouldExecute7702FlowCorrectly(address to, uint256 amount, bytes32 messageHash) public {
         vm.assume(to != address(0));
 
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            TEST_ACCOUNT_PRIVATE_KEY,
-            messageHash
-        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(TEST_ACCOUNT_PRIVATE_KEY, messageHash);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.signAndAttachDelegation(
-            address(justaNameAccount),
-            TEST_ACCOUNT_PRIVATE_KEY
-        );
-        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(
-            messageHash,
-            signature
-        );
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, signature);
         assertEq(result, bytes4(0x1626ba7e));
 
         bytes memory mintData = abi.encodeCall(ERC20Mock.mint, (to, amount));
@@ -56,17 +42,9 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
 
         assertEq(mockERC20.balanceOf(to), amount);
 
-        BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
-        calls[0] = BaseAccount.Call({
-            target: address(mockERC20),
-            value: 0,
-            data: burnData
-        });
-        calls[1] = BaseAccount.Call({
-            target: address(mockERC20),
-            value: 0,
-            data: mintData
-        });
+        JustaNameAccount.Call[] memory calls = new JustaNameAccount.Call[](2);
+        calls[0] = JustaNameAccount.Call({target: address(mockERC20), value: 0, data: burnData});
+        calls[1] = JustaNameAccount.Call({target: address(mockERC20), value: 0, data: mintData});
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
         vm.prank(TEST_ACCOUNT_ADDRESS);

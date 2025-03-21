@@ -30,6 +30,7 @@ contract ERC1155Mock is ERC1155 {
         _mint(to, tokenId, amount, data);
     }
 }
+
 contract TestGeneralJustaNameAccount is Test, CodeConstants {
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
@@ -60,33 +61,17 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     }
 
     function test_ShouldReturnTrueIfCorrectInterface() public view {
-        assertTrue(
-            justaNameAccount.supportsInterface(type(IAccount).interfaceId)
-        );
-        assertTrue(
-            justaNameAccount.supportsInterface(type(IERC165).interfaceId)
-        );
-        assertTrue(
-            justaNameAccount.supportsInterface(type(IERC1271).interfaceId)
-        );
-        assertTrue(
-            justaNameAccount.supportsInterface(
-                type(IERC721Receiver).interfaceId
-            )
-        );
-        assertTrue(
-            justaNameAccount.supportsInterface(
-                type(IERC1155Receiver).interfaceId
-            )
-        );
+        assertTrue(justaNameAccount.supportsInterface(type(IAccount).interfaceId));
+        assertTrue(justaNameAccount.supportsInterface(type(IERC165).interfaceId));
+        assertTrue(justaNameAccount.supportsInterface(type(IERC1271).interfaceId));
+        assertTrue(justaNameAccount.supportsInterface(type(IERC721Receiver).interfaceId));
+        assertTrue(justaNameAccount.supportsInterface(type(IERC1155Receiver).interfaceId));
     }
 
     /*//////////////////////////////////////////////////////////////
                         SUPPORTS INTERFACE TESTS
     //////////////////////////////////////////////////////////////*/
-    function test_ShouldReturnFalseIfIncorrectInterface(
-        bytes4 _interfaceId
-    ) public view {
+    function test_ShouldReturnFalseIfIncorrectInterface(bytes4 _interfaceId) public view {
         vm.assume(_interfaceId != type(IAccount).interfaceId);
         vm.assume(_interfaceId != type(IERC165).interfaceId);
         vm.assume(_interfaceId != type(IERC1271).interfaceId);
@@ -99,51 +84,29 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     /*//////////////////////////////////////////////////////////////
                           VALID SIGNATURE TESTS
     //////////////////////////////////////////////////////////////*/
-    function test_ShouldReturnFalseIfIncorrectSignature(
-        bytes32 messageHash
-    ) public {
+    function test_ShouldReturnFalseIfIncorrectSignature(bytes32 messageHash) public {
         (, uint256 alicePk) = makeAddrAndKey("alice");
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(alicePk, messageHash);
         bytes memory badSignature = abi.encodePacked(r, s, v);
 
-        vm.signAndAttachDelegation(
-            address(justaNameAccount),
-            TEST_ACCOUNT_PRIVATE_KEY
-        );
-        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(
-            messageHash,
-            badSignature
-        );
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, badSignature);
         assertEq(result, bytes4(0xffffffff));
     }
 
-    function test_ShouldReturnTrueIfSignatureIsValid(
-        bytes32 messageHash
-    ) public {
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            TEST_ACCOUNT_PRIVATE_KEY,
-            messageHash
-        );
+    function test_ShouldReturnTrueIfSignatureIsValid(bytes32 messageHash) public {
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(TEST_ACCOUNT_PRIVATE_KEY, messageHash);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.signAndAttachDelegation(
-            address(justaNameAccount),
-            TEST_ACCOUNT_PRIVATE_KEY
-        );
-        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(
-            messageHash,
-            signature
-        );
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, signature);
         assertEq(result, bytes4(0x1626ba7e));
     }
-
 
     /*//////////////////////////////////////////////////////////////
                             RECEIVER TESTS
     //////////////////////////////////////////////////////////////*/
-    function test_ShouldReceiveERC721Correctly(
-        uint256 tokenId
-    ) public {
+    function test_ShouldReceiveERC721Correctly(uint256 tokenId) public {
         erc721Mock.mint(NFT_OWNER, tokenId);
 
         vm.prank(NFT_OWNER);
@@ -153,17 +116,14 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         erc721Mock.safeTransferFrom(NFT_OWNER, TEST_ACCOUNT_ADDRESS, tokenId);
 
         assertEq(erc721Mock.balanceOf(TEST_ACCOUNT_ADDRESS), 1);
-        
+
         vm.prank(TEST_ACCOUNT_ADDRESS);
         erc721Mock.safeTransferFrom(TEST_ACCOUNT_ADDRESS, NFT_OWNER, tokenId);
 
         assertEq(erc721Mock.balanceOf(TEST_ACCOUNT_ADDRESS), 0);
     }
 
-    function test_ShouldReceiveERC1155Correctly(
-        uint256 tokenId,
-        uint256 amount
-    ) public {
+    function test_ShouldReceiveERC1155Correctly(uint256 tokenId, uint256 amount) public {
         erc1155Mock.mint(NFT_OWNER, tokenId, amount, bytes(""));
 
         vm.prank(NFT_OWNER);
