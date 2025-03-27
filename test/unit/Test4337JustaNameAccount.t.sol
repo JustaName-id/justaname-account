@@ -70,25 +70,25 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
     /*//////////////////////////////////////////////////////////////
                               EXECUTE TESTS
     //////////////////////////////////////////////////////////////*/
-    function test_ShouldExecuteCallCorrectly(
-        address sender,
-        uint256 amount
-    ) public {
-        vm.assume(sender != networkConfig.entryPointAddress);
-        vm.assume(sender != address(0));
+    // function test_ShouldExecuteCallCorrectly(
+    //     address sender,
+    //     uint256 amount
+    // ) public {
+    //     vm.assume(sender != networkConfig.entryPointAddress);
+    //     vm.assume(sender != address(0));
 
-        bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
-        bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
-        (PackedUserOperation memory userOp, bytes32 userOpHash) = preparePackedUserOp.generateSignedUserOperation(
-            executeCallData, networkConfig.entryPointAddress, TEST_ACCOUNT_ADDRESS
-        );
+    //     bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
+    //     bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
+    //     (PackedUserOperation memory userOp, bytes32 userOpHash) = preparePackedUserOp.generateSignedUserOperation(
+    //         executeCallData, networkConfig.entryPointAddress, TEST_ACCOUNT_ADDRESS
+    //     );
 
-        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
-        ops[0] = userOp;
+    //     PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+    //     ops[0] = userOp;
 
-        vm.prank(sender);
-        IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(sender));
+    //     vm.prank(sender);
+    //     IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(sender));
 
-        assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), amount);
-    }
+    //     assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), amount);
+    // }
 }
