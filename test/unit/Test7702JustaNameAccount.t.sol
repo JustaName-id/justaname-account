@@ -10,7 +10,6 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
 
-
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {CodeConstants} from "../../script/HelperConfig.s.sol";
 import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
