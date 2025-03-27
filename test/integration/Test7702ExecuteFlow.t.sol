@@ -8,6 +8,7 @@ import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {CodeConstants} from "../../script/HelperConfig.s.sol";
 import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
 import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
+import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
 
 contract Test7702ExecuteFlow is Test, CodeConstants {
     JustaNameAccount public justaNameAccount;
@@ -42,9 +43,9 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
 
         assertEq(mockERC20.balanceOf(to), amount);
 
-        JustaNameAccount.Call[] memory calls = new JustaNameAccount.Call[](2);
-        calls[0] = JustaNameAccount.Call({target: address(mockERC20), value: 0, data: burnData});
-        calls[1] = JustaNameAccount.Call({target: address(mockERC20), value: 0, data: mintData});
+        BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
+        calls[0] = BaseAccount.Call({target: address(mockERC20), value: 0, data: burnData});
+        calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: mintData});
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
         vm.prank(TEST_ACCOUNT_ADDRESS);
