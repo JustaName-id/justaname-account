@@ -14,11 +14,11 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
     HelperConfig public helperConfig;
     ERC20Mock public mockERC20;
 
-    address public entryPointAddress;
+    HelperConfig.NetworkConfig public networkConfig;
 
     function setUp() public {
         DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, entryPointAddress) = deployer.run();
+        (justaNameAccount, networkConfig) = deployer.run();
 
         mockERC20 = new ERC20Mock();
     }

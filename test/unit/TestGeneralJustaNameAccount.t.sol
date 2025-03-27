@@ -38,13 +38,13 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     ERC721Mock public erc721Mock;
     ERC1155Mock public erc1155Mock;
 
-    address public entryPointAddress;
+    HelperConfig.NetworkConfig public networkConfig;
 
     address public NFT_OWNER;
 
     function setUp() public {
         DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, entryPointAddress) = deployer.run();
+        (justaNameAccount, networkConfig) = deployer.run();
 
         NFT_OWNER = makeAddr("nft_owner");
 
@@ -57,7 +57,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     //////////////////////////////////////////////////////////////*/
     function test_ShouldReturnCorrectEntryPoint() public view {
         address _entryPoint = address(justaNameAccount.entryPoint());
-        assertEq(_entryPoint, entryPointAddress);
+        assertEq(_entryPoint, networkConfig.entryPointAddress);
     }
 
     function test_ShouldReturnTrueIfCorrectInterface() public view {
