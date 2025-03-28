@@ -49,11 +49,9 @@ contract PreparePackedUserOp is Script, CodeConstants {
         uint128 maxPriorityFeePerGas = 256;
         uint128 maxFeePerGas = maxPriorityFeePerGas;
         
-        // Format initCode for EIP-7702: 0x7702 followed by delegate address
         bytes memory initCode;
         if (delegateAddress != address(0)) {
-            // EIP-7702 format: 0x7702 (padded) followed by delegate address
-            initCode = abi.encodePacked(hex"7702000000000000000000", delegateAddress);
+            initCode = abi.encodePacked(bytes20(0x7702000000000000000000000000000000000000), delegateAddress);
         } else {
             initCode = hex"";
         }
