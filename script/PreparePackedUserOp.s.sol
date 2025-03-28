@@ -16,16 +16,8 @@ contract PreparePackedUserOp is Script, CodeConstants {
         bytes memory callData,
         address entryPoint
     ) public view returns (PackedUserOperation memory userOp, bytes32 userOpHash) {
-        return generateSignedUserOperation(callData, entryPoint, address(0));
-    }
-
-    function generateSignedUserOperation(
-        bytes memory callData,
-        address entryPoint,
-        address delegateAddress
-    ) public view returns (PackedUserOperation memory userOp, bytes32 userOpHash) {
-        uint256 nonce = vm.getNonce(TEST_ACCOUNT_ADDRESS);
-        userOp = _generateUnsignedUserOperation(callData, TEST_ACCOUNT_ADDRESS, nonce, delegateAddress);
+        uint256 nonce = IEntryPoint(entryPoint).getNonce(TEST_ACCOUNT_ADDRESS, 0);
+        userOp = _generateUnsignedUserOperation(callData, TEST_ACCOUNT_ADDRESS, nonce);
 
         userOpHash = IEntryPoint(entryPoint).getUserOpHash(userOp);
 
@@ -41,25 +33,17 @@ contract PreparePackedUserOp is Script, CodeConstants {
     function _generateUnsignedUserOperation(
         bytes memory callData,
         address sender,
-        uint256 nonce,
-        address delegateAddress
+        uint256 nonce
     ) internal pure returns (PackedUserOperation memory) {
         uint128 verificationGasLimit = 16777216;
         uint128 callGasLimit = verificationGasLimit;
         uint128 maxPriorityFeePerGas = 256;
         uint128 maxFeePerGas = maxPriorityFeePerGas;
         
-        bytes memory initCode;
-        if (delegateAddress != address(0)) {
-            initCode = abi.encodePacked(bytes20(0x7702000000000000000000000000000000000000), delegateAddress);
-        } else {
-            initCode = hex"";
-        }
-        
         return PackedUserOperation({
             sender: sender,
             nonce: nonce,
-            initCode: initCode,
+            initCode: abi.encodePacked(bytes20(0x7702000000000000000000000000000000000000)),
             callData: callData,
             accountGasLimits: bytes32(uint256(verificationGasLimit) << 128 | callGasLimit),
             preVerificationGas: verificationGasLimit,
