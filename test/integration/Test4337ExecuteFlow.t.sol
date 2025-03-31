@@ -33,10 +33,7 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
         vm.assume(to != address(0));
         vm.assume(to != networkConfig.entryPointAddress);
 
-        vm.deal(to, 10 ether);
-
-        vm.prank(to);
-        IEntryPoint(networkConfig.entryPointAddress).depositTo{value: 1 ether}(TEST_ACCOUNT_ADDRESS);
+        vm.deal(TEST_ACCOUNT_ADDRESS, 10 ether);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(TEST_ACCOUNT_PRIVATE_KEY, messageHash);
         bytes memory signature = abi.encodePacked(r, s, v);
@@ -52,7 +49,7 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
 
     function _executeMintOperation(address to, uint256 amount) internal {
         bytes memory functionData =
-            abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
+            abi.encodeWithSelector(mockERC20.mint.selector, TEST_ACCOUNT_ADDRESS, amount);
         bytes memory executeCallData =
             abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
         (PackedUserOperation memory userOp,) =

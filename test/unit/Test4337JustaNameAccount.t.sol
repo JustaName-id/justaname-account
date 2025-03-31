@@ -70,10 +70,7 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         vm.assume(sender != networkConfig.entryPointAddress);
         vm.assume(sender != address(0));
 
-        vm.deal(sender, 10 ether);
-
-        vm.prank(sender);
-        IEntryPoint(networkConfig.entryPointAddress).depositTo{value: 1 ether}(TEST_ACCOUNT_ADDRESS);
+        vm.deal(TEST_ACCOUNT_ADDRESS, 10 ether);
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
@@ -100,10 +97,7 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         vm.assume(sender != networkConfig.entryPointAddress);
         vm.assume(sender != address(0));
 
-        vm.deal(sender, 10 ether);
-
-        vm.prank(sender);
-        IEntryPoint(networkConfig.entryPointAddress).depositTo{value: 1 ether}(TEST_ACCOUNT_ADDRESS);
+        vm.deal(TEST_ACCOUNT_ADDRESS, 10 ether);
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
