@@ -48,8 +48,7 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
     }
 
     function _executeMintOperation(address to, uint256 amount) internal {
-        bytes memory functionData =
-            abi.encodeWithSelector(mockERC20.mint.selector, TEST_ACCOUNT_ADDRESS, amount);
+        bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, TEST_ACCOUNT_ADDRESS, amount);
         bytes memory executeCallData =
             abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
         (PackedUserOperation memory userOp,) =
