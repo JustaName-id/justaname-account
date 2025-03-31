@@ -13,7 +13,6 @@ import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol"
 import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
 import {PreparePackedUserOp} from "../../script/PreparePackedUserOp.s.sol";
 
-
 contract Test4337ExecuteFlow is Test, CodeConstants {
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
@@ -52,11 +51,12 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
     }
 
     function _executeMintOperation(address to, uint256 amount) internal {
-        bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
-        bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
-        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
-            executeCallData, networkConfig.entryPointAddress
-        );
+        bytes memory functionData =
+            abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
+        bytes memory executeCallData =
+            abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
+        (PackedUserOperation memory userOp,) =
+            preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = userOp;
@@ -76,16 +76,15 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
         calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: burnData});
 
         bytes memory executeBatchCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
-        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
-            executeBatchCallData, networkConfig.entryPointAddress
-        );
-        
+        (PackedUserOperation memory userOp,) =
+            preparePackedUserOp.generateSignedUserOperation(executeBatchCallData, networkConfig.entryPointAddress);
+
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = userOp;
-        
+
         vm.prank(to);
         IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS));
-        
+
         assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), amount);
     }
 }

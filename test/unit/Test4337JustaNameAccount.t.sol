@@ -8,12 +8,10 @@ import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
 import "@account-abstraction/core/Helpers.sol";
 import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
 
-
 import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
 import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
 import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
 import {PreparePackedUserOp} from "../../script/PreparePackedUserOp.s.sol";
-
 
 contract Test4337JustaNameAccount is Test, CodeConstants {
     JustaNameAccount public justaNameAccount;
@@ -44,26 +42,20 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
-        (PackedUserOperation memory userOp, bytes32 userOpHash) = preparePackedUserOp.generateSignedUserOperation(
-            callData,
-            networkConfig.entryPointAddress
-        );
+        (PackedUserOperation memory userOp, bytes32 userOpHash) =
+            preparePackedUserOp.generateSignedUserOperation(callData, networkConfig.entryPointAddress);
 
         vm.prank(sender);
         vm.expectRevert("account: not from EntryPoint");
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).validateUserOp(userOp, userOpHash, missingAccountFunds);
     }
-    
+
     // TODO: test the payPrefund function
-    function test_ShouldValidateUserOpCorrectly(
-        bytes memory callData
-    ) public {
+    function test_ShouldValidateUserOpCorrectly(bytes memory callData) public {
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
-        
-        (PackedUserOperation memory userOp, bytes32 userOpHash) = preparePackedUserOp.generateSignedUserOperation(
-            callData, 
-            networkConfig.entryPointAddress
-        );
+
+        (PackedUserOperation memory userOp, bytes32 userOpHash) =
+            preparePackedUserOp.generateSignedUserOperation(callData, networkConfig.entryPointAddress);
 
         vm.prank(networkConfig.entryPointAddress);
         uint256 validationData = JustaNameAccount(TEST_ACCOUNT_ADDRESS).validateUserOp(userOp, userOpHash, 0);
@@ -74,10 +66,7 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
     /*//////////////////////////////////////////////////////////////
                               EXECUTE TESTS
     //////////////////////////////////////////////////////////////*/
-    function test_ShouldExecuteCallCorrectly(
-        address sender,
-        uint256 amount
-    ) public {
+    function test_ShouldExecuteCallCorrectly(address sender, uint256 amount) public {
         vm.assume(sender != networkConfig.entryPointAddress);
         vm.assume(sender != address(0));
 
@@ -88,11 +77,12 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
-        bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
-        bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
-        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
-            executeCallData, networkConfig.entryPointAddress
-        );
+        bytes memory functionData =
+            abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
+        bytes memory executeCallData =
+            abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
+        (PackedUserOperation memory userOp,) =
+            preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = userOp;
@@ -106,10 +96,7 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
     /*//////////////////////////////////////////////////////////////
                            EXECUTE BATCH TESTS
     //////////////////////////////////////////////////////////////*/
-    function test_ShouldExecuteBatchCallsCorrectly(
-        address sender,
-        uint256 amount
-    ) public {
+    function test_ShouldExecuteBatchCallsCorrectly(address sender, uint256 amount) public {
         vm.assume(sender != networkConfig.entryPointAddress);
         vm.assume(sender != address(0));
 
@@ -128,9 +115,8 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: functionData2});
 
         bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
-        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
-            executeCallData, networkConfig.entryPointAddress
-        );
+        (PackedUserOperation memory userOp,) =
+            preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = userOp;

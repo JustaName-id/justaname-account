@@ -12,10 +12,11 @@ import {CodeConstants} from "./HelperConfig.s.sol";
 contract PreparePackedUserOp is Script, CodeConstants {
     using MessageHashUtils for bytes32;
 
-    function generateSignedUserOperation(
-        bytes memory callData,
-        address entryPoint
-    ) public view returns (PackedUserOperation memory userOp, bytes32 userOpHash) {
+    function generateSignedUserOperation(bytes memory callData, address entryPoint)
+        public
+        view
+        returns (PackedUserOperation memory userOp, bytes32 userOpHash)
+    {
         uint256 nonce = IEntryPoint(entryPoint).getNonce(TEST_ACCOUNT_ADDRESS, 0);
         userOp = _generateUnsignedUserOperation(callData, TEST_ACCOUNT_ADDRESS, nonce);
 
@@ -30,16 +31,16 @@ contract PreparePackedUserOp is Script, CodeConstants {
         return (userOp, userOpHash);
     }
 
-    function _generateUnsignedUserOperation(
-        bytes memory callData,
-        address sender,
-        uint256 nonce
-    ) internal pure returns (PackedUserOperation memory) {
+    function _generateUnsignedUserOperation(bytes memory callData, address sender, uint256 nonce)
+        internal
+        pure
+        returns (PackedUserOperation memory)
+    {
         uint128 verificationGasLimit = 16777216;
         uint128 callGasLimit = verificationGasLimit;
         uint128 maxPriorityFeePerGas = 256;
         uint128 maxFeePerGas = maxPriorityFeePerGas;
-        
+
         return PackedUserOperation({
             sender: sender,
             nonce: nonce,
