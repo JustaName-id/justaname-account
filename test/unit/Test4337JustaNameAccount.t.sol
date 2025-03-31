@@ -6,6 +6,8 @@ import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {PackedUserOperation} from "@account-abstraction/interfaces/PackedUserOperation.sol";
 import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
 import "@account-abstraction/core/Helpers.sol";
+import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
+
 
 import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
 import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
@@ -88,7 +90,7 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
 
         bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
         bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
-        (PackedUserOperation memory userOp, bytes32 userOpHash) = preparePackedUserOp.generateSignedUserOperation(
+        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
             executeCallData, networkConfig.entryPointAddress
         );
 
@@ -99,5 +101,43 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS));
 
         assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), amount);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                           EXECUTE BATCH TESTS
+    //////////////////////////////////////////////////////////////*/
+    function test_ShouldExecuteBatchCallsCorrectly(
+        address sender,
+        uint256 amount
+    ) public {
+        vm.assume(sender != networkConfig.entryPointAddress);
+        vm.assume(sender != address(0));
+
+        vm.deal(sender, 10 ether);
+
+        vm.prank(sender);
+        IEntryPoint(networkConfig.entryPointAddress).depositTo{value: 1 ether}(TEST_ACCOUNT_ADDRESS);
+
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+
+        bytes memory functionata1 = abi.encodeCall(mockERC20.mint, (TEST_ACCOUNT_ADDRESS, amount));
+        bytes memory functionData2 = abi.encodeCall(mockERC20.burn, (TEST_ACCOUNT_ADDRESS, amount));
+
+        BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
+        calls[0] = BaseAccount.Call({target: address(mockERC20), value: 0, data: functionata1});
+        calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: functionData2});
+
+        bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
+        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
+            executeCallData, networkConfig.entryPointAddress
+        );
+
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        ops[0] = userOp;
+
+        vm.prank(sender);
+        IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS));
+
+        assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), 0);
     }
 }
