@@ -1,0 +1,91 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
+
+import {Test, console, Vm} from "forge-std/Test.sol";
+import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
+import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
+import {PackedUserOperation} from "@account-abstraction/interfaces/PackedUserOperation.sol";
+import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
+import "@account-abstraction/core/Helpers.sol";
+
+import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
+import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
+import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
+import {PreparePackedUserOp} from "../../script/PreparePackedUserOp.s.sol";
+
+
+contract Test4337ExecuteFlow is Test, CodeConstants {
+    JustaNameAccount public justaNameAccount;
+    HelperConfig public helperConfig;
+    ERC20Mock public mockERC20;
+    PreparePackedUserOp public preparePackedUserOp;
+
+    HelperConfig.NetworkConfig public networkConfig;
+
+    function setUp() public {
+        DeployJustaNameAccount deployer = new DeployJustaNameAccount();
+        (justaNameAccount, networkConfig) = deployer.run();
+
+        mockERC20 = new ERC20Mock();
+        preparePackedUserOp = new PreparePackedUserOp();
+    }
+
+    function test_ShouldExecute7702FlowCorrectly(address to, uint256 amount, bytes32 messageHash) public {
+        vm.assume(to != address(0));
+        vm.assume(to != networkConfig.entryPointAddress);
+
+        vm.deal(to, 10 ether);
+
+        vm.prank(to);
+        IEntryPoint(networkConfig.entryPointAddress).depositTo{value: 1 ether}(TEST_ACCOUNT_ADDRESS);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(TEST_ACCOUNT_PRIVATE_KEY, messageHash);
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+
+        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, signature);
+        assertEq(result, bytes4(0x1626ba7e));
+
+        _executeMintOperation(to, amount);
+        _executeBatchOperation(to, amount);
+    }
+
+    function _executeMintOperation(address to, uint256 amount) internal {
+        bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
+        bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
+        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
+            executeCallData, networkConfig.entryPointAddress
+        );
+
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        ops[0] = userOp;
+
+        vm.prank(to);
+        IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS));
+
+        assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), amount);
+    }
+
+    function _executeBatchOperation(address to, uint256 amount) internal {
+        bytes memory mintData = abi.encodeCall(ERC20Mock.mint, (to, amount));
+        bytes memory burnData = abi.encodeCall(ERC20Mock.burn, (to, amount));
+
+        BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
+        calls[0] = BaseAccount.Call({target: address(mockERC20), value: 0, data: mintData});
+        calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: burnData});
+
+        bytes memory executeBatchCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
+        (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
+            executeBatchCallData, networkConfig.entryPointAddress
+        );
+        
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        ops[0] = userOp;
+        
+        vm.prank(to);
+        IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS));
+        
+        assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), amount);
+    }
+}
