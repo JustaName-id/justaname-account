@@ -5,7 +5,6 @@ import {Receiver} from "@solady/accounts/Receiver.sol";
 import {ECDSA} from "@solady/utils/ECDSA.sol";
 import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
 import {PackedUserOperation} from "@account-abstraction/interfaces/PackedUserOperation.sol";
-import {Exec} from "@account-abstraction/utils/Exec.sol";
 import "@account-abstraction/core/Helpers.sol";
 
 import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
@@ -21,53 +20,11 @@ import {IAccount} from "@account-abstraction/interfaces/IAccount.sol";
  */
 contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
     error JustaNameAccount_NotOwnerorEntryPoint();
-    error JustaNameAccount_ExecuteError(uint256 index, bytes error);
-
-    struct Call {
-        address target;
-        uint256 value;
-        bytes data;
-    }
 
     IEntryPoint private immutable i_entryPoint;
 
     constructor(address entryPointAddress) {
         i_entryPoint = IEntryPoint(entryPointAddress);
-    }
-
-    /**
-     * @notice execute a single call from the account.
-     */
-    function execute(address target, uint256 value, bytes calldata data) external virtual {
-        _requireForExecute();
-
-        bool success = Exec.call(target, value, data, gasleft());
-        if (!success) {
-            Exec.revertWithData(Exec.getReturnData(0));
-        }
-    }
-
-    /**
-     * @notice execute a batch of calls.
-     * @dev revert on the first call that fails.
-     * If the batch reverts, and it contains more than a single call, then wrap the revert with ExecuteError,
-     *  to mark the failing call index.
-     */
-    function executeBatch(Call[] calldata calls) external virtual {
-        _requireForExecute();
-
-        uint256 callsLength = calls.length;
-        for (uint256 i = 0; i < callsLength; i++) {
-            Call calldata call = calls[i];
-            bool success = Exec.call(call.target, call.value, call.data, gasleft());
-            if (!success) {
-                if (callsLength == 1) {
-                    Exec.revertWithData(Exec.getReturnData(0));
-                } else {
-                    revert JustaNameAccount_ExecuteError(i, Exec.getReturnData(0));
-                }
-            }
-        }
     }
 
     /**
@@ -129,7 +86,7 @@ contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
     /**
      * @notice This function makes sure the caller is the owner or the entrypoint
      */
-    function _requireForExecute() internal view {
+    function _requireForExecute() internal view override {
         require(
             msg.sender == address(this) || msg.sender == address(entryPoint()), JustaNameAccount_NotOwnerorEntryPoint()
         );

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import {Test, console, Vm} from "forge-std/Test.sol";
+import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
@@ -14,11 +15,11 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
     HelperConfig public helperConfig;
     ERC20Mock public mockERC20;
 
-    address public entryPointAddress;
+    HelperConfig.NetworkConfig public networkConfig;
 
     function setUp() public {
         DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, entryPointAddress) = deployer.run();
+        (justaNameAccount, networkConfig) = deployer.run();
 
         mockERC20 = new ERC20Mock();
     }
@@ -42,9 +43,9 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
 
         assertEq(mockERC20.balanceOf(to), amount);
 
-        JustaNameAccount.Call[] memory calls = new JustaNameAccount.Call[](2);
-        calls[0] = JustaNameAccount.Call({target: address(mockERC20), value: 0, data: burnData});
-        calls[1] = JustaNameAccount.Call({target: address(mockERC20), value: 0, data: mintData});
+        BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
+        calls[0] = BaseAccount.Call({target: address(mockERC20), value: 0, data: burnData});
+        calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: mintData});
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
         vm.prank(TEST_ACCOUNT_ADDRESS);

@@ -7,10 +7,12 @@ import {EntryPoint} from "@account-abstraction/core/EntryPoint.sol";
 abstract contract CodeConstants {
     uint256 public constant MAINNET_ETH_CHAIN_ID = 1;
     uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
+    uint256 public constant ETH_HOLESKY_CHAIN_ID = 17000;
     uint256 public constant LOCAL_CHAIN_ID = 31337;
 
     address public constant MAINNET_ENTRYPOINT_ADDRESS = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
     address public constant SEPOLIA_ENTRYPOINT_ADDRESS = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
+    address public constant HOLESKY_ENTRYPOINT_ADDRESS = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
 
     address payable public constant TEST_ACCOUNT_ADDRESS = payable(0x70997970C51812dc3A010C7d01b50e0d17dc79C8);
     uint256 public constant TEST_ACCOUNT_PRIVATE_KEY =
@@ -29,6 +31,8 @@ contract HelperConfig is CodeConstants, Script {
             return getOrCreateAnvilEthConfig();
         } else if (chainId == ETH_SEPOLIA_CHAIN_ID) {
             return getSepoliaConfig();
+        } else if (chainId == ETH_HOLESKY_CHAIN_ID) {
+            return getHoleskyConfig();
         } else if (chainId == MAINNET_ETH_CHAIN_ID) {
             return getMainnetConfig();
         } else {
@@ -56,5 +60,9 @@ contract HelperConfig is CodeConstants, Script {
 
     function getMainnetConfig() public pure returns (NetworkConfig memory) {
         return NetworkConfig({entryPointAddress: MAINNET_ENTRYPOINT_ADDRESS});
+    }
+
+    function getHoleskyConfig() public pure returns (NetworkConfig memory) {
+        return NetworkConfig({entryPointAddress: HOLESKY_ENTRYPOINT_ADDRESS});
     }
 }

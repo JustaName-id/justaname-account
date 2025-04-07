@@ -38,13 +38,13 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     ERC721Mock public erc721Mock;
     ERC1155Mock public erc1155Mock;
 
-    address public entryPointAddress;
+    HelperConfig.NetworkConfig public networkConfig;
 
     address public NFT_OWNER;
 
     function setUp() public {
         DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, entryPointAddress) = deployer.run();
+        (justaNameAccount, networkConfig) = deployer.run();
 
         NFT_OWNER = makeAddr("nft_owner");
 
@@ -57,7 +57,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     //////////////////////////////////////////////////////////////*/
     function test_ShouldReturnCorrectEntryPoint() public view {
         address _entryPoint = address(justaNameAccount.entryPoint());
-        assertEq(_entryPoint, entryPointAddress);
+        assertEq(_entryPoint, networkConfig.entryPointAddress);
     }
 
     function test_ShouldReturnTrueIfCorrectInterface() public view {
@@ -107,6 +107,8 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
                             RECEIVER TESTS
     //////////////////////////////////////////////////////////////*/
     function test_ShouldReceiveERC721Correctly(uint256 tokenId) public {
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+
         erc721Mock.mint(NFT_OWNER, tokenId);
 
         vm.prank(NFT_OWNER);
@@ -124,6 +126,8 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     }
 
     function test_ShouldReceiveERC1155Correctly(uint256 tokenId, uint256 amount) public {
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+
         erc1155Mock.mint(NFT_OWNER, tokenId, amount, bytes(""));
 
         vm.prank(NFT_OWNER);
@@ -135,5 +139,23 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         erc1155Mock.safeTransferFrom(TEST_ACCOUNT_ADDRESS, NFT_OWNER, tokenId, amount, bytes(""));
 
         assertEq(erc1155Mock.balanceOf(TEST_ACCOUNT_ADDRESS, tokenId), 0);
+    }
+
+    function test_ShouldReceiveEtherCorrectly(
+        address sender,
+        uint256 amount
+    ) public payable {
+        vm.assume(sender != address(0));
+        vm.assume(sender != TEST_ACCOUNT_ADDRESS);
+
+        vm.deal(sender, amount);
+
+        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+
+        vm.prank(sender);
+        (bool success, ) = payable(TEST_ACCOUNT_ADDRESS).call{value: amount}("");
+        assertTrue(success);
+
+        assertEq(TEST_ACCOUNT_ADDRESS.balance, amount);
     }
 }
