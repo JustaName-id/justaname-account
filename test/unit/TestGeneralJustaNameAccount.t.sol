@@ -141,10 +141,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         assertEq(erc1155Mock.balanceOf(TEST_ACCOUNT_ADDRESS, tokenId), 0);
     }
 
-    function test_ShouldReceiveEtherCorrectly(
-        address sender,
-        uint256 amount
-    ) public payable {
+    function test_ShouldReceiveEtherCorrectly(address sender, uint256 amount) public payable {
         vm.assume(sender != address(0));
         vm.assume(sender != TEST_ACCOUNT_ADDRESS);
 
@@ -153,7 +150,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         vm.prank(sender);
-        (bool success, ) = payable(TEST_ACCOUNT_ADDRESS).call{value: amount}("");
+        (bool success,) = payable(TEST_ACCOUNT_ADDRESS).call{value: amount}("");
         assertTrue(success);
 
         assertEq(TEST_ACCOUNT_ADDRESS.balance, amount);
