@@ -40,7 +40,7 @@ contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
      * @param signature The signature of the message.
      * @return result The result of the signature validation.
      */
-    function isValidSignature(bytes32 hash, bytes calldata signature) public view returns (bytes4 result) {
+    function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4 result) {
         bool success = _checkSignature(hash, signature);
         assembly {
             // `success ? bytes4(keccak256("isValidSignature(bytes32,bytes)")) : 0xffffffff`.
