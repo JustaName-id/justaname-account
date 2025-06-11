@@ -79,10 +79,11 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
 
     /**
      * @notice Validates signature.
-     * @dev Checks whether the recovered address is equal to the account address.
+     * @dev Checks whether the recovered address is equal to the account address or is an owner of this account.
      */
     function _checkSignature(bytes32 hash, bytes calldata signature) internal view returns (bool) {
-        return ECDSA.recoverCalldata(hash, signature) == address(this);
+        return ECDSA.recoverCalldata(hash, signature) == address(this) || 
+               isOwnerAddress(ECDSA.recoverCalldata(hash, signature));
     }
 
     /**
