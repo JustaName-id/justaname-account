@@ -204,29 +204,6 @@ contract MultiOwnable {
         return _getMultiOwnableStorage().removedOwnersCount;
     }
 
-    /// @notice Initialize the owners of this contract.
-    ///
-    /// @dev Intended to be called contract is first deployed and never again.
-    /// @dev Reverts if a provided owner is neither 64 bytes long (for public key) nor a valid address.
-    ///
-    /// @param owners The initial set of owners.
-    function _initializeOwners(bytes[] memory owners) internal virtual {
-        MultiOwnableStorage storage $ = _getMultiOwnableStorage();
-        uint256 nextOwnerIndex_ = $.nextOwnerIndex;
-        for (uint256 i; i < owners.length; i++) {
-            if (owners[i].length != 32 && owners[i].length != 64) {
-                revert InvalidOwnerBytesLength(owners[i]);
-            }
-
-            if (owners[i].length == 32 && uint256(bytes32(owners[i])) > type(uint160).max) {
-                revert InvalidEthereumAddressOwner(owners[i]);
-            }
-
-            _addOwnerAtIndex(owners[i], nextOwnerIndex_++);
-        }
-        $.nextOwnerIndex = nextOwnerIndex_;
-    }
-
     /// @notice Adds an owner at the given `index`.
     ///
     /// @dev Reverts if `owner` is already registered as an owner.
