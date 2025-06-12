@@ -81,4 +81,4 @@ contract TestMultiOwnableContractSelf is Test, CodeConstants {
         assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner));
         assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerPublicKey(x, y));
     }
-} 
+}

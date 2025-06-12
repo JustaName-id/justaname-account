@@ -24,7 +24,7 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         (INITIAL_OWNER, INITIAL_OWNER_PK) = makeAddrAndKey("INITIAL_OWNER");
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
-        
+
         vm.prank(TEST_ACCOUNT_ADDRESS);
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(INITIAL_OWNER);
     }
@@ -200,7 +200,11 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
 
         vm.prank(owner);
-        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.WrongOwnerAtIndex.selector, 0, abi.encode(owner), abi.encode(INITIAL_OWNER)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MultiOwnable.WrongOwnerAtIndex.selector, 0, abi.encode(owner), abi.encode(INITIAL_OWNER)
+            )
+        );
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(owner));
     }
 

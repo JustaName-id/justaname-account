@@ -82,8 +82,8 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
      * @dev Checks whether the recovered address is equal to the account address or is an owner of this account.
      */
     function _checkSignature(bytes32 hash, bytes calldata signature) internal view returns (bool) {
-        return ECDSA.recoverCalldata(hash, signature) == address(this) || 
-               isOwnerAddress(ECDSA.recoverCalldata(hash, signature));
+        return ECDSA.recoverCalldata(hash, signature) == address(this)
+            || isOwnerAddress(ECDSA.recoverCalldata(hash, signature));
     }
 
     /**
@@ -91,7 +91,8 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
      */
     function _requireForExecute() internal view override {
         require(
-            msg.sender == address(this) || msg.sender == address(entryPoint()) || isOwnerAddress(msg.sender), JustaNameAccount_NotOwnerorEntryPoint()
+            msg.sender == address(this) || msg.sender == address(entryPoint()) || isOwnerAddress(msg.sender),
+            JustaNameAccount_NotOwnerorEntryPoint()
         );
     }
 }
