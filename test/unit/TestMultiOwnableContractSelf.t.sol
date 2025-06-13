@@ -51,6 +51,12 @@ contract TestMultiOwnableContractSelf is Test, CodeConstants {
     }
 
     function test_ShouldAllowContractSelfToRemoveOwnerAtIndex(address owner1, address owner2) public {
+        vm.assume(owner1 != address(0));
+        vm.assume(owner2 != address(0));
+        vm.assume(owner1 != owner2);
+        vm.assume(owner1 != TEST_ACCOUNT_ADDRESS);
+        vm.assume(owner2 != TEST_ACCOUNT_ADDRESS);
+
         vm.startPrank(TEST_ACCOUNT_ADDRESS);
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1);
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2);
