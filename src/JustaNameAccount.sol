@@ -14,11 +14,13 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {IAccount} from "@account-abstraction/interfaces/IAccount.sol";
 
+import {MultiOwnable} from "./MultiOwnable.sol";
+
 /**
  * @title JustaNameAccount
  * @notice This contract is to be used with EIP-7702 (for batching) and supports ERC-4337 (for gas sponsoring)
  */
-contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
+contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1271 {
     error JustaNameAccount_NotOwnerorEntryPoint();
 
     IEntryPoint private immutable i_entryPoint;
@@ -77,18 +79,20 @@ contract JustaNameAccount is BaseAccount, Receiver, IERC165, IERC1271 {
 
     /**
      * @notice Validates signature.
-     * @dev Checks whether the recovered address is equal to the account address.
+     * @dev Checks whether the recovered address is equal to the account address or is an owner of this account.
      */
     function _checkSignature(bytes32 hash, bytes calldata signature) internal view returns (bool) {
-        return ECDSA.recoverCalldata(hash, signature) == address(this);
+        return ECDSA.recoverCalldata(hash, signature) == address(this)
+            || isOwnerAddress(ECDSA.recoverCalldata(hash, signature));
     }
 
     /**
-     * @notice This function makes sure the caller is the owner or the entrypoint
+     * @notice This function makes sure the caller is an owner or the entrypoint
      */
     function _requireForExecute() internal view override {
         require(
-            msg.sender == address(this) || msg.sender == address(entryPoint()), JustaNameAccount_NotOwnerorEntryPoint()
+            msg.sender == address(this) || msg.sender == address(entryPoint()) || isOwnerAddress(msg.sender),
+            JustaNameAccount_NotOwnerorEntryPoint()
         );
     }
 }
