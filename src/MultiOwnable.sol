@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+import {ECDSA} from "@solady/utils/ECDSA.sol";
+
 /// @notice Storage layout used by this contract.
 ///
 /// @custom:storage-location erc7201:coinbase.storage.MultiOwnable
@@ -37,9 +39,6 @@ contract MultiOwnable {
     ///      Follows ERC-7201 (see https://eips.ethereum.org/EIPS/eip-7201).
     bytes32 private constant MUTLI_OWNABLE_STORAGE_LOCATION =
         0x97e2c6aad4ce5d562ebfaa00db6b9e0fb66ea5d8162ed5b243f51a2e03086f00;
-
-    /// @notice Thrown when the `msg.sender` is not an owner and is trying to call a privileged function.
-    error Unauthorized();
 
     /// @notice Thrown when trying to add an already registered owner.
     ///
@@ -91,9 +90,13 @@ contract MultiOwnable {
 
     /// @notice Access control modifier ensuring the caller is an authorized owner
     modifier onlyOwner() virtual {
-        _checkOwner();
+        _checkOwnerOrEntryPoint();
         _;
     }
+
+    /// @notice Checks if the sender is an owner of this contract.
+    /// @dev Revert if the sender is not an owner of the contract.
+    function _checkOwnerOrEntryPoint() internal view virtual {}
 
     /// @notice Adds a new Ethereum-address owner.
     ///
@@ -240,17 +243,6 @@ contract MultiOwnable {
         $.removedOwnersCount++;
 
         emit RemoveOwner(index, owner);
-    }
-
-    /// @notice Checks if the sender is an owner of this contract or the contract itself.
-    ///
-    /// @dev Revert if the sender is not an owner fo the contract itself.
-    function _checkOwner() internal view virtual {
-        if (isOwnerAddress(msg.sender) || (msg.sender == address(this))) {
-            return;
-        }
-
-        revert Unauthorized();
     }
 
     /// @notice Helper function to get a storage reference to the `MultiOwnableStorage` struct.

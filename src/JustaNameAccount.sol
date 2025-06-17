@@ -21,7 +21,7 @@ import {MultiOwnable} from "./MultiOwnable.sol";
  * @notice This contract is to be used with EIP-7702 (for batching) and supports ERC-4337 (for gas sponsoring)
  */
 contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1271 {
-    error JustaNameAccount_NotOwnerorEntryPoint();
+    error JustaNameAccount_NotOwnerOrEntryPoint();
 
     IEntryPoint private immutable i_entryPoint;
 
@@ -90,9 +90,18 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
      * @notice This function makes sure the caller is an owner or the entrypoint
      */
     function _requireForExecute() internal view override {
-        require(
-            msg.sender == address(this) || msg.sender == address(entryPoint()) || isOwnerAddress(msg.sender),
-            JustaNameAccount_NotOwnerorEntryPoint()
-        );
+        _checkOwnerOrEntryPoint();
+    }
+
+    /**
+     * @notice Checks if the sender is an owner of this contract or the contract itself.
+     * @dev Revert if the sender is not an owner fo the contract itself or the entrypoint.
+     */
+    function _checkOwnerOrEntryPoint() internal view virtual override {
+        if (isOwnerAddress(msg.sender) || (msg.sender == address(this)) || (msg.sender == address(entryPoint()))) {
+            return;
+        }
+
+        revert JustaNameAccount_NotOwnerOrEntryPoint();
     }
 }

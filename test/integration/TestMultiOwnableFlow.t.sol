@@ -28,7 +28,7 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
     }
 
-    function test_ShouldChangeOwnershipCorrectly(
+    function test_ShouldChangeOwnershipCorrectlyWith7702(
         address owner1,
         address owner2,
         address owner3,
@@ -112,33 +112,52 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner1));
     }
 
-    // function test_ShouldAddOwnerVia4337(address newOwner) public {
-    //     vm.assume(newOwner != address(0));
-    //     vm.assume(newOwner != TEST_ACCOUNT_ADDRESS);
+    function test_ShouldChangeOwnershipCorrectlyWith4337(address newOwner1, address newOwner2) public {
+        vm.assume(newOwner1 != address(0));
+        vm.assume(newOwner1 != TEST_ACCOUNT_ADDRESS);
+        vm.assume(newOwner1 != address(networkConfig.entryPointAddress));
+        vm.assume(newOwner2 != address(0));
+        vm.assume(newOwner2 != TEST_ACCOUNT_ADDRESS);
+        vm.assume(newOwner2 != address(networkConfig.entryPointAddress));
+        vm.assume(newOwner1 != newOwner2);
 
-    //     vm.deal(TEST_ACCOUNT_ADDRESS, 1 ether);
+        vm.deal(TEST_ACCOUNT_ADDRESS, 1 ether);
 
-    //     bytes memory functionData = abi.encodeWithSelector(
-    //         bytes4(keccak256("addOwnerAddress(address)")),
-    //         newOwner
-    //     );
+        bytes memory addOwnerData = abi.encodeWithSelector(MultiOwnable.addOwnerAddress.selector, newOwner1);
+        bytes memory executeCallData =
+            abi.encodeWithSelector(justaNameAccount.execute.selector, TEST_ACCOUNT_ADDRESS, 0, addOwnerData);
+        (PackedUserOperation memory userOp,) =
+            preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 
-    //     (PackedUserOperation memory userOp,) = preparePackedUserOp.generateSignedUserOperation(
-    //         functionData,
-    //         networkConfig.entryPointAddress
-    //     );
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        ops[0] = userOp;
 
-    //     PackedUserOperation[] memory ops = new PackedUserOperation[](1);
-    //     ops[0] = userOp;
+        vm.prank(newOwner1);
+        IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS));
 
-    //     try IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS)) {
-    //         console.log("UserOperation executed successfully");
-    //     } catch Error(string memory reason) {
-    //         console.log("UserOperation failed:", reason);
-    //         revert(reason);
-    //     }
+        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner1));
+        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
 
-    //     assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner));
-    //     assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
-    // }
+        bytes memory addSecondOwnerData = abi.encodeWithSelector(MultiOwnable.addOwnerAddress.selector, newOwner2);
+        bytes memory removeSecondOwnerData =
+            abi.encodeWithSelector(MultiOwnable.removeOwnerAtIndex.selector, 1, abi.encode(newOwner2));
+
+        BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
+        calls[0] = BaseAccount.Call({target: TEST_ACCOUNT_ADDRESS, value: 0, data: addSecondOwnerData});
+        calls[1] = BaseAccount.Call({target: TEST_ACCOUNT_ADDRESS, value: 0, data: removeSecondOwnerData});
+
+        bytes memory executeBatchCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
+        (PackedUserOperation memory batchUserOp,) =
+            preparePackedUserOp.generateSignedUserOperation(executeBatchCallData, networkConfig.entryPointAddress);
+
+        PackedUserOperation[] memory batchOps = new PackedUserOperation[](1);
+        batchOps[0] = batchUserOp;
+
+        vm.prank(newOwner1);
+        IEntryPoint(networkConfig.entryPointAddress).handleOps(batchOps, payable(TEST_ACCOUNT_ADDRESS));
+
+        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner2));
+        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
+        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner1));
+    }
 }

@@ -113,9 +113,11 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
     function test_ThrowErrorIfNonOwnerAddsOwnerAddress(address nonOwner) public {
         vm.assume(nonOwner != INITIAL_OWNER);
         vm.assume(nonOwner != address(0));
+        vm.assume(nonOwner != TEST_ACCOUNT_ADDRESS);
+        vm.assume(nonOwner != address(networkConfig.entryPointAddress));
 
         vm.prank(nonOwner);
-        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.Unauthorized.selector));
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(nonOwner);
     }
 
@@ -147,9 +149,11 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
     function test_ThrowErrorIfNonOwnerAddsOwnerPublicKey(address nonOwner, bytes32 x, bytes32 y) public {
         vm.assume(nonOwner != INITIAL_OWNER);
         vm.assume(nonOwner != address(0));
+        vm.assume(nonOwner != TEST_ACCOUNT_ADDRESS);
+        vm.assume(nonOwner != address(networkConfig.entryPointAddress));
 
         vm.prank(nonOwner);
-        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.Unauthorized.selector));
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerPublicKey(x, y);
     }
 
@@ -211,9 +215,11 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
     function test_ThrowErrorIfNonOwnerRemovesOwner(address nonOwner) public {
         vm.assume(nonOwner != INITIAL_OWNER);
         vm.assume(nonOwner != address(0));
+        vm.assume(nonOwner != TEST_ACCOUNT_ADDRESS);
+        vm.assume(nonOwner != address(networkConfig.entryPointAddress));
 
         vm.prank(nonOwner);
-        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.Unauthorized.selector));
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(INITIAL_OWNER));
     }
 
