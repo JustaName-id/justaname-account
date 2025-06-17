@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.4;
 
 import {ECDSA} from "@solady/utils/ECDSA.sol";
 
@@ -37,7 +37,7 @@ contract MultiOwnable {
     ///      Computed from
     ///      keccak256(abi.encode(uint256(keccak256("coinbase.storage.MultiOwnable")) - 1)) & ~bytes32(uint256(0xff))
     ///      Follows ERC-7201 (see https://eips.ethereum.org/EIPS/eip-7201).
-    bytes32 private constant MUTLI_OWNABLE_STORAGE_LOCATION =
+    bytes32 private constant MULTI_OWNABLE_STORAGE_LOCATION =
         0x97e2c6aad4ce5d562ebfaa00db6b9e0fb66ea5d8162ed5b243f51a2e03086f00;
 
     /// @notice Thrown when trying to add an already registered owner.
@@ -250,7 +250,7 @@ contract MultiOwnable {
     /// @return $ A storage reference to the `MultiOwnableStorage` struct.
     function _getMultiOwnableStorage() internal pure returns (MultiOwnableStorage storage $) {
         assembly ("memory-safe") {
-            $.slot := MUTLI_OWNABLE_STORAGE_LOCATION
+            $.slot := MULTI_OWNABLE_STORAGE_LOCATION
         }
     }
 }

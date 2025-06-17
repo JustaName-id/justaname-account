@@ -94,8 +94,8 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
     }
 
     /**
-     * @notice Checks if the sender is an owner of this contract or the contract itself.
-     * @dev Revert if the sender is not an owner fo the contract itself or the entrypoint.
+     * @notice Checks if the sender is an owner of this contract or the entrypoint.
+     * @dev Reverts if the sender is not an owner of the contract or the entrypoint.
      */
     function _checkOwnerOrEntryPoint() internal view virtual override {
         if (isOwnerAddress(msg.sender) || (msg.sender == address(this)) || (msg.sender == address(entryPoint()))) {
