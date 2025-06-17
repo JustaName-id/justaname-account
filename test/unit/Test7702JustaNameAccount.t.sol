@@ -14,6 +14,7 @@ import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {CodeConstants} from "../../script/HelperConfig.s.sol";
 import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
 import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
+import {MultiOwnable} from "../../src/MultiOwnable.sol";
 
 contract Test7702JustaNameAccount is Test, CodeConstants {
     JustaNameAccount public justaNameAccount;
@@ -35,7 +36,7 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
     function test_ThrowErrorIfCallingExecuteFromNotEntrypointOrOwner(address target, uint256 value, bytes calldata data)
         public
     {
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerorEntryPoint.selector));
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         justaNameAccount.execute(target, value, data);
     }
 
@@ -61,7 +62,7 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
 
         vm.broadcast(BOB_PK);
         vm.attachDelegation(signedDelegation);
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerorEntryPoint.selector));
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).execute(address(mockERC20), 0, data);
     }
 
@@ -78,7 +79,7 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
         BaseAccount.Call[] memory calls = new BaseAccount.Call[](1);
         calls[0] = BaseAccount.Call({target: target, value: value, data: data});
 
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerorEntryPoint.selector));
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         justaNameAccount.executeBatch(calls);
     }
 
@@ -116,7 +117,7 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
 
         vm.broadcast(BOB_PK);
         vm.attachDelegation(signedDelegation);
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerorEntryPoint.selector));
+        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).executeBatch(calls);
     }
 }
