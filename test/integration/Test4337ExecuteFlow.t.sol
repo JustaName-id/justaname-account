@@ -29,7 +29,7 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
         preparePackedUserOp = new PreparePackedUserOp();
     }
 
-    function test_ShouldExecute7702FlowCorrectly(address to, uint256 amount, bytes32 messageHash) public {
+    function test_ShouldExecute4337FlowCorrectly(address to, uint256 amount, bytes32 messageHash) public {
         vm.assume(to != address(0));
         vm.assume(to != networkConfig.entryPointAddress);
 
