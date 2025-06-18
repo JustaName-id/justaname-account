@@ -95,7 +95,9 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
 
     function test_ThrowErrorIfAddingDuplicateOwnerAddress() public {
         vm.prank(INITIAL_OWNER);
-        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_AlreadyOwner.selector, abi.encode(INITIAL_OWNER)));
+        vm.expectRevert(
+            abi.encodeWithSelector(MultiOwnable.MultiOwnable_AlreadyOwner.selector, abi.encode(INITIAL_OWNER))
+        );
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(INITIAL_OWNER);
     }
 
@@ -109,7 +111,7 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(nonOwner);
     }
-    
+
     /*//////////////////////////////////////////////////////////////
                       REMOVE OWNER AT INDEX TESTS
     //////////////////////////////////////////////////////////////*/

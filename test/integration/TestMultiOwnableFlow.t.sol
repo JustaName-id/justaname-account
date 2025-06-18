@@ -28,11 +28,7 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
     }
 
-    function test_ShouldChangeOwnershipCorrectlyWith7702(
-        address owner1,
-        address owner2,
-        address owner3
-    ) public {
+    function test_ShouldChangeOwnershipCorrectlyWith7702(address owner1, address owner2, address owner3) public {
         vm.assume(owner1 != address(0));
         vm.assume(owner2 != address(0));
         vm.assume(owner3 != address(0));

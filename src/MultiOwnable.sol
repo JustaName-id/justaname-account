@@ -16,10 +16,10 @@ struct MultiOwnableStorage {
     uint256 removedOwnersCount;
     /**
      * @dev Maps index to owner bytes, used to idenfitied owners via a uint256 index.
-     * 
+     *
      * The `owner` bytes should be:
      *  - An ABI encoded Ethereum address (20 bytes)
-     * 
+     *
      * The design allows for future expansion to support other types of owners,
      * such as public keys (64 bytes).
      */
@@ -76,7 +76,6 @@ contract MultiOwnable {
     bytes32 private constant MULTI_OWNABLE_STORAGE_LOCATION =
         0x1860bbcd4070722545f3d4c498700ae30fda21f6bf1050d72d704cd0bd2cc100;
 
-
     /**
      * @notice Emitted when a new owner is registered.
      * @param index The owner index of the owner added.
@@ -85,7 +84,7 @@ contract MultiOwnable {
     event AddOwner(uint256 indexed index, bytes owner);
 
     /**
-     * @notice Emitted when an owner is removed. 
+     * @notice Emitted when an owner is removed.
      * @param index The owner index of the owner removed.
      * @param owner The owner removed.
      */
@@ -115,11 +114,11 @@ contract MultiOwnable {
 
     /**
      * @notice Removes owner at the given `index`.
-     * 
+     *
      * @dev Reverts if the owner is not registered at `index`.
      * @dev Reverts if there is currently only one owner.
      * @dev Reverts if `owner` does not match bytes found at `index`.
-     * 
+     *
      * @param index The index of the owner to be removed.
      * @param owner The ABI encoded bytes of the owner to be removed.
      */
@@ -133,11 +132,11 @@ contract MultiOwnable {
 
     /**
      * @notice Removes owner at the given `index`, which should be the only current owner.
-     * 
+     *
      * @dev Reverts if the owner is not registered at `index`.
      * @dev Reverts if there is currently more than one owner.
      * @dev Reverts if `owner` does not match bytes found at `index`.
-     * 
+     *
      * @param index The index of the owner to be removed.
      * @param owner The ABI encoded bytes of the owner to be removed.
      */
