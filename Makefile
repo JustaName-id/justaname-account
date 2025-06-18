@@ -36,6 +36,20 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 	NETWORK_ARGS := --rpc-url $(SEPOLIA_RPC_URL) --account $(SEPOLIA_ACCOUNT) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
 endif
 
+ifeq ($(findstring --network base-sepolia,$(ARGS)),--network base-sepolia)
+	NETWORK_ARGS := --rpc-url $(BASE_SEPOLIA_RPC_URL) --account $(SEPOLIA_ACCOUNT) --broadcast --verify --verifier-url $(SEPOLIA_BASESCAN_API) --etherscan-api-key $(BASESCAN_API_KEY) -vvvv
+endif
+
+ifeq ($(findstring --network op-sepolia,$(ARGS)),--network op-sepolia)
+	NETWORK_ARGS := --rpc-url $(OP_SEPOLIA_RPC_URL) --account $(SEPOLIA_ACCOUNT) --broadcast --verify --verifier-url $(SEPOLIA_OPSCAN_API) --etherscan-api-key $(OPSCAN_API_KEY) -vvvv
+endif
+
 deploy-sepolia:
+	@forge script script/DeployJustaNameAccount.s.sol:DeployJustaNameAccount $(NETWORK_ARGS)
+
+deploy-base-sepolia:
+	@forge script script/DeployJustaNameAccount.s.sol:DeployJustaNameAccount $(NETWORK_ARGS)
+
+deploy-op-sepolia:
 	@forge script script/DeployJustaNameAccount.s.sol:DeployJustaNameAccount $(NETWORK_ARGS)
 
