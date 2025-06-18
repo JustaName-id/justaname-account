@@ -31,14 +31,6 @@ contract TestMultiOwnableContractSelf is Test, CodeConstants {
         assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
     }
 
-    function test_ShouldAllowContractSelfToAddOwnerPublicKey(bytes32 x, bytes32 y) public {
-        vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerPublicKey(x, y);
-
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerPublicKey(x, y));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
-    }
-
     function test_ShouldAllowContractSelfToRemoveLastOwner(address owner) public {
         vm.prank(TEST_ACCOUNT_ADDRESS);
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
@@ -70,7 +62,7 @@ contract TestMultiOwnableContractSelf is Test, CodeConstants {
         assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
     }
 
-    function test_ShouldAllowBothContractSelfAndOwnerAccess(address owner, bytes32 x, bytes32 y) public {
+    function test_ShouldAllowBothContractSelfAndOwnerAccess(address owner) public {
         vm.assume(owner != TEST_ACCOUNT_ADDRESS);
         vm.assume(owner != address(0));
 
@@ -78,13 +70,13 @@ contract TestMultiOwnableContractSelf is Test, CodeConstants {
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
 
         vm.prank(owner);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerPublicKey(x, y);
+        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(makeAddr("newOwner"));
 
         vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(1, abi.encode(x, y));
+        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(1, abi.encode(makeAddr("newOwner")));
 
         assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
         assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner));
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerPublicKey(x, y));
+        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(makeAddr("newOwner")));
     }
 }
