@@ -5,14 +5,34 @@ import {Script, console2} from "forge-std/Script.sol";
 import {EntryPoint} from "@account-abstraction/core/EntryPoint.sol";
 
 abstract contract CodeConstants {
-    uint256 public constant MAINNET_ETH_CHAIN_ID = 1;
-    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
-    uint256 public constant ETH_HOLESKY_CHAIN_ID = 17000;
     uint256 public constant LOCAL_CHAIN_ID = 31337;
 
-    address public constant MAINNET_ENTRYPOINT_ADDRESS = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
-    address public constant SEPOLIA_ENTRYPOINT_ADDRESS = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
-    address public constant HOLESKY_ENTRYPOINT_ADDRESS = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
+    uint256 public constant MAINNET_ETH_CHAIN_ID = 1;
+    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
+
+    uint256 public constant BASE_CHAIN_ID = 8453;
+    uint256 public constant BASE_SEPOLIA_CHAIN_ID = 84532;
+
+    uint256 public constant OPTIMISM_CHAIN_ID = 10;
+    uint256 public constant OPTIMISM_SEPOLIA_CHAIN_ID = 11155420;
+
+    uint256 public constant ARBITRUM_ONE_CHAIN_ID = 42161;
+    uint256 public constant ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
+
+    uint256 public constant POLYGON_CHAIN_ID = 137;
+    uint256 public constant POLYGON_AMOY_CHAIN_ID = 80002;
+
+    uint256 public constant SCROLL_CHAIN_ID = 534352;
+    uint256 public constant SCROLL_SEPOLIA_CHAIN_ID = 534351;
+
+    uint256 public constant UNICHAIN_CHAIN_ID = 130;
+    uint256 public constant UNICHAIN_SEPOLIA_CHAIN_ID = 1301;
+
+    uint256 public constant GNOSIS_CHAIN_ID = 100;
+    uint256 public constant GNOSIS_CHIADO_CHAIN_ID = 10200;
+
+    // Address of the v0.8 EntryPoint contract
+    address public constant ENTRYPOINT_ADDRESS = 0x4337084D9E255Ff0702461CF8895CE9E3b5Ff108;
 
     address payable public constant TEST_ACCOUNT_ADDRESS = payable(0x70997970C51812dc3A010C7d01b50e0d17dc79C8);
     uint256 public constant TEST_ACCOUNT_PRIVATE_KEY =
@@ -26,15 +46,20 @@ contract HelperConfig is CodeConstants, Script {
         address entryPointAddress;
     }
 
+    function isSupportedChain(uint256 chainId) public pure returns (bool) {
+        return chainId == ETH_SEPOLIA_CHAIN_ID || chainId == MAINNET_ETH_CHAIN_ID || chainId == BASE_CHAIN_ID
+            || chainId == BASE_SEPOLIA_CHAIN_ID || chainId == OPTIMISM_CHAIN_ID || chainId == OPTIMISM_SEPOLIA_CHAIN_ID
+            || chainId == ARBITRUM_ONE_CHAIN_ID || chainId == ARBITRUM_SEPOLIA_CHAIN_ID || chainId == POLYGON_CHAIN_ID
+            || chainId == POLYGON_AMOY_CHAIN_ID || chainId == SCROLL_CHAIN_ID || chainId == SCROLL_SEPOLIA_CHAIN_ID
+            || chainId == UNICHAIN_CHAIN_ID || chainId == UNICHAIN_SEPOLIA_CHAIN_ID || chainId == GNOSIS_CHAIN_ID
+            || chainId == GNOSIS_CHIADO_CHAIN_ID;
+    }
+
     function getConfigByChainId(uint256 chainId) public returns (NetworkConfig memory) {
         if (chainId == LOCAL_CHAIN_ID) {
             return getOrCreateAnvilEthConfig();
-        } else if (chainId == ETH_SEPOLIA_CHAIN_ID) {
-            return getSepoliaConfig();
-        } else if (chainId == ETH_HOLESKY_CHAIN_ID) {
-            return getHoleskyConfig();
-        } else if (chainId == MAINNET_ETH_CHAIN_ID) {
-            return getMainnetConfig();
+        } else if (isSupportedChain(chainId)) {
+            return NetworkConfig({entryPointAddress: ENTRYPOINT_ADDRESS});
         } else {
             revert HelperConfig__InvalidChainId();
         }
@@ -52,17 +77,5 @@ contract HelperConfig is CodeConstants, Script {
         console2.log("Mocks deployed!");
 
         return NetworkConfig({entryPointAddress: address(entryPoint)});
-    }
-
-    function getSepoliaConfig() public pure returns (NetworkConfig memory) {
-        return NetworkConfig({entryPointAddress: SEPOLIA_ENTRYPOINT_ADDRESS});
-    }
-
-    function getMainnetConfig() public pure returns (NetworkConfig memory) {
-        return NetworkConfig({entryPointAddress: MAINNET_ENTRYPOINT_ADDRESS});
-    }
-
-    function getHoleskyConfig() public pure returns (NetworkConfig memory) {
-        return NetworkConfig({entryPointAddress: HOLESKY_ENTRYPOINT_ADDRESS});
     }
 }

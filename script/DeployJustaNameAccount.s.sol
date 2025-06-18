@@ -12,7 +12,7 @@ contract DeployJustaNameAccount is Script {
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
 
         vm.startBroadcast();
-        JustaNameAccount account = new JustaNameAccount(config.entryPointAddress);
+        JustaNameAccount account = new JustaNameAccount{salt: 0}(config.entryPointAddress);
         vm.stopBroadcast();
 
         return (account, config);
