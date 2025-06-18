@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Receiver} from "@solady/accounts/Receiver.sol";
 import {ECDSA} from "@solady/utils/ECDSA.sol";
+
 import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
 import {PackedUserOperation} from "@account-abstraction/interfaces/PackedUserOperation.sol";
+import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
+import {IAccount} from "@account-abstraction/interfaces/IAccount.sol";
 import "@account-abstraction/core/Helpers.sol";
 
-import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import {IAccount} from "@account-abstraction/interfaces/IAccount.sol";
+import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import {MultiOwnable} from "./MultiOwnable.sol";
 
@@ -20,7 +22,7 @@ import {MultiOwnable} from "./MultiOwnable.sol";
  * @title JustaNameAccount
  * @notice This contract is to be used via EIP-7702 delegation and supports ERC-4337
  */
-contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1271 {
+contract JustaNameAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, ERC1155Holder, ERC721Holder {
     /**
      * @notice Thrown if caller is not an owner or the entrypoint.
      */
@@ -39,6 +41,10 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
     constructor(address entryPointAddress) {
         i_entryPoint = IEntryPoint(entryPointAddress);
     }
+
+    fallback() external payable {}
+
+    receive() external payable {}
 
     /**
      * @notice Returns entrypoint used by this account
@@ -67,7 +73,7 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
      * @param id The interface ID.
      * @return Whether the contract supports the interface.
      */
-    function supportsInterface(bytes4 id) public pure virtual returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(ERC1155Holder, IERC165) returns (bool) {
         return id == type(IERC165).interfaceId || id == type(IAccount).interfaceId || id == type(IERC1271).interfaceId
             || id == type(IERC1155Receiver).interfaceId || id == type(IERC721Receiver).interfaceId;
     }
@@ -109,7 +115,7 @@ contract JustaNameAccount is BaseAccount, Receiver, MultiOwnable, IERC165, IERC1
      * @dev Reverts if the sender is not an owner of the contract or the entrypoint.
      */
     function _checkOwnerOrEntryPoint() internal view virtual override {
-        if (isOwnerAddress(msg.sender) || (msg.sender == address(this)) || (msg.sender == address(entryPoint()))) {
+        if ((msg.sender == address(this)) || (msg.sender == address(entryPoint())) || isOwnerAddress(msg.sender)) {
             return;
         }
 
