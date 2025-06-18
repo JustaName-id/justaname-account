@@ -47,14 +47,12 @@ contract HelperConfig is CodeConstants, Script {
     }
 
     function isSupportedChain(uint256 chainId) public pure returns (bool) {
-        return chainId == ETH_SEPOLIA_CHAIN_ID || chainId == MAINNET_ETH_CHAIN_ID || 
-               chainId == BASE_CHAIN_ID || chainId == BASE_SEPOLIA_CHAIN_ID || chainId == OPTIMISM_CHAIN_ID ||
-               chainId == OPTIMISM_SEPOLIA_CHAIN_ID || chainId == ARBITRUM_ONE_CHAIN_ID || 
-               chainId == ARBITRUM_SEPOLIA_CHAIN_ID || chainId == POLYGON_CHAIN_ID || 
-               chainId == POLYGON_AMOY_CHAIN_ID || chainId == SCROLL_CHAIN_ID || 
-               chainId == SCROLL_SEPOLIA_CHAIN_ID || chainId == UNICHAIN_CHAIN_ID || 
-               chainId == UNICHAIN_SEPOLIA_CHAIN_ID || chainId == GNOSIS_CHAIN_ID || 
-               chainId == GNOSIS_CHIADO_CHAIN_ID;
+        return chainId == ETH_SEPOLIA_CHAIN_ID || chainId == MAINNET_ETH_CHAIN_ID || chainId == BASE_CHAIN_ID
+            || chainId == BASE_SEPOLIA_CHAIN_ID || chainId == OPTIMISM_CHAIN_ID || chainId == OPTIMISM_SEPOLIA_CHAIN_ID
+            || chainId == ARBITRUM_ONE_CHAIN_ID || chainId == ARBITRUM_SEPOLIA_CHAIN_ID || chainId == POLYGON_CHAIN_ID
+            || chainId == POLYGON_AMOY_CHAIN_ID || chainId == SCROLL_CHAIN_ID || chainId == SCROLL_SEPOLIA_CHAIN_ID
+            || chainId == UNICHAIN_CHAIN_ID || chainId == UNICHAIN_SEPOLIA_CHAIN_ID || chainId == GNOSIS_CHAIN_ID
+            || chainId == GNOSIS_CHIADO_CHAIN_ID;
     }
 
     function getConfigByChainId(uint256 chainId) public returns (NetworkConfig memory) {
