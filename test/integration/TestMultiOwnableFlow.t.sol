@@ -28,15 +28,7 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
     }
 
-    function test_ShouldChangeOwnershipCorrectlyWith7702(
-        address owner1,
-        address owner2,
-        address owner3,
-        bytes32 pubKeyX,
-        bytes32 pubKeyY,
-        bytes32 pubKeyX2,
-        bytes32 pubKeyY2
-    ) public {
+    function test_ShouldChangeOwnershipCorrectlyWith7702(address owner1, address owner2, address owner3) public {
         vm.assume(owner1 != address(0));
         vm.assume(owner2 != address(0));
         vm.assume(owner3 != address(0));
@@ -56,54 +48,30 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner1));
 
         vm.prank(owner1);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerPublicKey(pubKeyX, pubKeyY);
-
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerPublicKey(pubKeyX, pubKeyY));
-
-        vm.prank(owner1);
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2);
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 3);
+        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
         assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner2));
-
-        vm.prank(owner2);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerPublicKey(pubKeyX2, pubKeyY2);
-
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 4);
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerPublicKey(pubKeyX2, pubKeyY2));
 
         vm.prank(owner2);
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner3);
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 5);
+        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 3);
         assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner3));
 
         vm.prank(owner3);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(4, abi.encode(owner3));
+        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(2, abi.encode(owner3));
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 4);
+        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
         assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner3));
         assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
 
         vm.prank(owner1);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(3, abi.encode(pubKeyX2, pubKeyY2));
-
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 3);
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerPublicKey(pubKeyX2, pubKeyY2));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 2);
-
-        vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(2, abi.encode(owner2));
-
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner2));
-
-        vm.prank(owner1);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(1, abi.encode(pubKeyX, pubKeyY));
+        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(1, abi.encode(owner2));
 
         assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerPublicKey(pubKeyX, pubKeyY));
+        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner2));
+        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 2);
 
         vm.prank(TEST_ACCOUNT_ADDRESS);
         JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeLastOwner(0, abi.encode(owner1));
