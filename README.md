@@ -22,7 +22,7 @@ The contract consists of two main components:
 The primary account contract that inherits from:
 
 - BaseAccount (ERC-4337 compliance)
-- ERC1155Holder, ERC721Holder (OpenZeppelin token receiver functionality)
+- Receiver (Solady's receive functionality)
 - MultiOwnable (Multi-owner management)
 - IERC165, IERC1271 (Interface support)
 
