@@ -1,20 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Test, console, Vm} from "forge-std/Test.sol";
-import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
-import {PackedUserOperation} from "@account-abstraction/interfaces/PackedUserOperation.sol";
-import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
-import "@account-abstraction/core/Helpers.sol";
+import { BaseAccount } from "@account-abstraction/core/BaseAccount.sol";
 
-import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
-import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
-import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
-import {MultiOwnable} from "../../src/MultiOwnable.sol";
-import {PreparePackedUserOp} from "../../script/PreparePackedUserOp.s.sol";
+import "@account-abstraction/core/Helpers.sol";
+import { IEntryPoint } from "@account-abstraction/interfaces/IEntryPoint.sol";
+import { PackedUserOperation } from "@account-abstraction/interfaces/PackedUserOperation.sol";
+import { ERC20Mock } from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
+import { Test, Vm, console } from "forge-std/Test.sol";
+
+import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { CodeConstants, HelperConfig } from "../../script/HelperConfig.s.sol";
+
+import { PreparePackedUserOp } from "../../script/PreparePackedUserOp.s.sol";
+import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
+import { MultiOwnable } from "../../src/MultiOwnable.sol";
 
 contract TestMultiOwnableFlow is Test, CodeConstants {
+
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
     HelperConfig.NetworkConfig public networkConfig;
@@ -111,8 +114,8 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
             abi.encodeWithSelector(MultiOwnable.removeOwnerAtIndex.selector, 1, abi.encode(newOwner2));
 
         BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
-        calls[0] = BaseAccount.Call({target: TEST_ACCOUNT_ADDRESS, value: 0, data: addSecondOwnerData});
-        calls[1] = BaseAccount.Call({target: TEST_ACCOUNT_ADDRESS, value: 0, data: removeSecondOwnerData});
+        calls[0] = BaseAccount.Call({ target: TEST_ACCOUNT_ADDRESS, value: 0, data: addSecondOwnerData });
+        calls[1] = BaseAccount.Call({ target: TEST_ACCOUNT_ADDRESS, value: 0, data: removeSecondOwnerData });
 
         bytes memory executeBatchCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
         (PackedUserOperation memory batchUserOp,) =
@@ -128,4 +131,5 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
         assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner1));
     }
+
 }

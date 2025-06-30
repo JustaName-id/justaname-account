@@ -1,37 +1,45 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Test, console, Vm} from "forge-std/Test.sol";
-import {IAccount} from "@account-abstraction/interfaces/IAccount.sol";
-import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {ERC1155} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { IAccount } from "@account-abstraction/interfaces/IAccount.sol";
 
-import {HelperConfig} from "../../script/HelperConfig.s.sol";
-import {CodeConstants} from "../../script/HelperConfig.s.sol";
-import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
-import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
+import { IERC1271 } from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+
+import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { Test, Vm, console } from "forge-std/Test.sol";
+
+import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { HelperConfig } from "../../script/HelperConfig.s.sol";
+import { CodeConstants } from "../../script/HelperConfig.s.sol";
+import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
 
 contract ERC721Mock is ERC721 {
-    constructor() ERC721("ERC721Mock", "E721M") {}
+
+    constructor() ERC721("ERC721Mock", "E721M") { }
 
     function mint(address to, uint256 tokenId) public {
         _mint(to, tokenId);
     }
+
 }
 
 contract ERC1155Mock is ERC1155 {
-    constructor() ERC1155("") {}
+
+    constructor() ERC1155("") { }
 
     function mint(address to, uint256 tokenId, uint256 amount, bytes memory data) public {
         _mint(to, tokenId, amount, data);
     }
+
 }
 
 contract TestGeneralJustaNameAccount is Test, CodeConstants {
+
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
 
@@ -150,9 +158,10 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         vm.prank(sender);
-        (bool success,) = payable(TEST_ACCOUNT_ADDRESS).call{value: amount}("");
+        (bool success,) = payable(TEST_ACCOUNT_ADDRESS).call{ value: amount }("");
         assertTrue(success);
 
         assertEq(TEST_ACCOUNT_ADDRESS.balance, amount);
     }
+
 }

@@ -36,6 +36,7 @@ struct MultiOwnableStorage {
  * @notice Auth contract allowing multiple owners, each identified as bytes.
  */
 contract MultiOwnable {
+
     /**
      * @notice Thrown when trying to add an already registered owner.
      * @param owner The owner bytes.
@@ -102,7 +103,7 @@ contract MultiOwnable {
      * @notice Checks if the sender is an owner of this contract.
      * @dev Revert if the sender is not an owner of the contract.
      */
-    function _checkOwnerOrEntryPoint() internal view virtual {}
+    function _checkOwnerOrEntryPoint() internal view virtual { }
 
     /**
      * @notice Adds a new Ethereum-address owner.
@@ -211,7 +212,9 @@ contract MultiOwnable {
      * @param index The index to write to.
      */
     function _addOwnerAtIndex(bytes memory owner, uint256 index) internal virtual {
-        if (isOwnerBytes(owner)) revert MultiOwnable_AlreadyOwner(owner);
+        if (isOwnerBytes(owner)) {
+            revert MultiOwnable_AlreadyOwner(owner);
+        }
 
         MultiOwnableStorage storage $ = _getMultiOwnableStorage();
         $.isOwner[owner] = true;
@@ -231,9 +234,11 @@ contract MultiOwnable {
      */
     function _removeOwnerAtIndex(uint256 index, bytes calldata owner) internal virtual {
         bytes memory owner_ = ownerAtIndex(index);
-        if (owner_.length == 0) revert MultiOwnable_NoOwnerAtIndex(index);
+        if (owner_.length == 0) {
+            revert MultiOwnable_NoOwnerAtIndex(index);
+        }
         if (keccak256(owner_) != keccak256(owner)) {
-            revert MultiOwnable_WrongOwnerAtIndex({index: index, expectedOwner: owner, actualOwner: owner_});
+            revert MultiOwnable_WrongOwnerAtIndex({ index: index, expectedOwner: owner, actualOwner: owner_ });
         }
 
         MultiOwnableStorage storage $ = _getMultiOwnableStorage();
@@ -253,4 +258,5 @@ contract MultiOwnable {
             $.slot := MULTI_OWNABLE_STORAGE_LOCATION
         }
     }
+
 }
