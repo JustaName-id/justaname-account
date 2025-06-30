@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Test, console, Vm} from "forge-std/Test.sol";
-import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
+import { BaseAccount } from "@account-abstraction/core/BaseAccount.sol";
+import { ERC20Mock } from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
+import { Test, Vm, console } from "forge-std/Test.sol";
 
-import {HelperConfig} from "../../script/HelperConfig.s.sol";
-import {CodeConstants} from "../../script/HelperConfig.s.sol";
-import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
-import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
+import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { HelperConfig } from "../../script/HelperConfig.s.sol";
+import { CodeConstants } from "../../script/HelperConfig.s.sol";
+import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
 
 contract Test7702ExecuteFlow is Test, CodeConstants {
+
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
     ERC20Mock public mockERC20;
@@ -44,8 +45,8 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
         assertEq(mockERC20.balanceOf(to), amount);
 
         BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
-        calls[0] = BaseAccount.Call({target: address(mockERC20), value: 0, data: burnData});
-        calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: mintData});
+        calls[0] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: burnData });
+        calls[1] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: mintData });
 
         vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
         vm.prank(TEST_ACCOUNT_ADDRESS);
@@ -53,4 +54,5 @@ contract Test7702ExecuteFlow is Test, CodeConstants {
 
         assertEq(mockERC20.balanceOf(to), amount);
     }
+
 }

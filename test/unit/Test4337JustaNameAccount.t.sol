@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Test, console, Vm} from "forge-std/Test.sol";
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
-import {PackedUserOperation} from "@account-abstraction/interfaces/PackedUserOperation.sol";
-import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
+import { BaseAccount } from "@account-abstraction/core/BaseAccount.sol";
 import "@account-abstraction/core/Helpers.sol";
-import {BaseAccount} from "@account-abstraction/core/BaseAccount.sol";
+import { IEntryPoint } from "@account-abstraction/interfaces/IEntryPoint.sol";
+import { PackedUserOperation } from "@account-abstraction/interfaces/PackedUserOperation.sol";
+import { ERC20Mock } from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
+import { Test, Vm, console } from "forge-std/Test.sol";
 
-import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
-import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
-import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
-import {PreparePackedUserOp} from "../../script/PreparePackedUserOp.s.sol";
+import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { CodeConstants, HelperConfig } from "../../script/HelperConfig.s.sol";
+
+import { PreparePackedUserOp } from "../../script/PreparePackedUserOp.s.sol";
+import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
 
 contract Test4337JustaNameAccount is Test, CodeConstants {
+
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
     ERC20Mock public mockERC20;
@@ -36,7 +38,9 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         address sender,
         bytes memory callData,
         uint256 missingAccountFunds
-    ) public {
+    )
+        public
+    {
         vm.assume(sender != networkConfig.entryPointAddress);
         vm.assume(sender != address(0));
 
@@ -105,8 +109,8 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         bytes memory functionData2 = abi.encodeCall(mockERC20.burn, (TEST_ACCOUNT_ADDRESS, amount));
 
         BaseAccount.Call[] memory calls = new BaseAccount.Call[](2);
-        calls[0] = BaseAccount.Call({target: address(mockERC20), value: 0, data: functionata1});
-        calls[1] = BaseAccount.Call({target: address(mockERC20), value: 0, data: functionData2});
+        calls[0] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: functionata1 });
+        calls[1] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: functionData2 });
 
         bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
         (PackedUserOperation memory userOp,) =
@@ -120,4 +124,5 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
 
         assertEq(mockERC20.balanceOf(TEST_ACCOUNT_ADDRESS), 0);
     }
+
 }

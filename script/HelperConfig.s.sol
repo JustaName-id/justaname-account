@@ -1,35 +1,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Script, console2} from "forge-std/Script.sol";
-import {EntryPoint} from "@account-abstraction/core/EntryPoint.sol";
+import { EntryPoint } from "@account-abstraction/core/EntryPoint.sol";
+import { Script, console2 } from "forge-std/Script.sol";
 
 abstract contract CodeConstants {
-    uint256 public constant LOCAL_CHAIN_ID = 31337;
+
+    uint256 public constant LOCAL_CHAIN_ID = 31_337;
 
     uint256 public constant MAINNET_ETH_CHAIN_ID = 1;
-    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
+    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11_155_111;
 
     uint256 public constant BASE_CHAIN_ID = 8453;
-    uint256 public constant BASE_SEPOLIA_CHAIN_ID = 84532;
+    uint256 public constant BASE_SEPOLIA_CHAIN_ID = 84_532;
 
     uint256 public constant OPTIMISM_CHAIN_ID = 10;
-    uint256 public constant OPTIMISM_SEPOLIA_CHAIN_ID = 11155420;
+    uint256 public constant OPTIMISM_SEPOLIA_CHAIN_ID = 11_155_420;
 
-    uint256 public constant ARBITRUM_ONE_CHAIN_ID = 42161;
-    uint256 public constant ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
+    uint256 public constant ARBITRUM_ONE_CHAIN_ID = 42_161;
+    uint256 public constant ARBITRUM_SEPOLIA_CHAIN_ID = 421_614;
 
     uint256 public constant POLYGON_CHAIN_ID = 137;
-    uint256 public constant POLYGON_AMOY_CHAIN_ID = 80002;
+    uint256 public constant POLYGON_AMOY_CHAIN_ID = 80_002;
 
-    uint256 public constant SCROLL_CHAIN_ID = 534352;
-    uint256 public constant SCROLL_SEPOLIA_CHAIN_ID = 534351;
+    uint256 public constant SCROLL_CHAIN_ID = 534_352;
+    uint256 public constant SCROLL_SEPOLIA_CHAIN_ID = 534_351;
 
     uint256 public constant UNICHAIN_CHAIN_ID = 130;
     uint256 public constant UNICHAIN_SEPOLIA_CHAIN_ID = 1301;
 
     uint256 public constant GNOSIS_CHAIN_ID = 100;
-    uint256 public constant GNOSIS_CHIADO_CHAIN_ID = 10200;
+    uint256 public constant GNOSIS_CHIADO_CHAIN_ID = 10_200;
 
     // Address of the v0.8 EntryPoint contract
     address public constant ENTRYPOINT_ADDRESS = 0x4337084D9E255Ff0702461CF8895CE9E3b5Ff108;
@@ -37,9 +38,11 @@ abstract contract CodeConstants {
     address payable public constant TEST_ACCOUNT_ADDRESS = payable(0x70997970C51812dc3A010C7d01b50e0d17dc79C8);
     uint256 public constant TEST_ACCOUNT_PRIVATE_KEY =
         0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d;
+
 }
 
 contract HelperConfig is CodeConstants, Script {
+
     error HelperConfig__InvalidChainId();
 
     struct NetworkConfig {
@@ -59,7 +62,7 @@ contract HelperConfig is CodeConstants, Script {
         if (chainId == LOCAL_CHAIN_ID) {
             return getOrCreateAnvilEthConfig();
         } else if (isSupportedChain(chainId)) {
-            return NetworkConfig({entryPointAddress: ENTRYPOINT_ADDRESS});
+            return NetworkConfig({ entryPointAddress: ENTRYPOINT_ADDRESS });
         } else {
             revert HelperConfig__InvalidChainId();
         }
@@ -76,6 +79,7 @@ contract HelperConfig is CodeConstants, Script {
         vm.stopBroadcast();
         console2.log("Mocks deployed!");
 
-        return NetworkConfig({entryPointAddress: address(entryPoint)});
+        return NetworkConfig({ entryPointAddress: address(entryPoint) });
     }
+
 }

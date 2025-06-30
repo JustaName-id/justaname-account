@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Test, console, Vm} from "forge-std/Test.sol";
+import { Test, Vm, console } from "forge-std/Test.sol";
 
-import {HelperConfig} from "../../script/HelperConfig.s.sol";
-import {CodeConstants} from "../../script/HelperConfig.s.sol";
-import {DeployJustaNameAccount} from "../../script/DeployJustaNameAccount.s.sol";
-import {JustaNameAccount} from "../../src/JustaNameAccount.sol";
+import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { HelperConfig } from "../../script/HelperConfig.s.sol";
+import { CodeConstants } from "../../script/HelperConfig.s.sol";
+import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
 
 contract TestMultiOwnableContractSelf is Test, CodeConstants {
+
     JustaNameAccount public justaNameAccount;
     HelperConfig public helperConfig;
     HelperConfig.NetworkConfig public networkConfig;
@@ -79,4 +80,5 @@ contract TestMultiOwnableContractSelf is Test, CodeConstants {
         assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner));
         assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(makeAddr("newOwner")));
     }
+
 }
