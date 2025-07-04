@@ -9,11 +9,11 @@ struct MultiOwnableStorage {
     /**
      * @dev Tracks the index of the next owner to add.
      */
-    uint256 nextOwnerIndex;
+    uint256 s_nextOwnerIndex;
     /**
      * @dev Tracks number of owners that have been removed.
      */
-    uint256 removedOwnersCount;
+    uint256 s_removedOwnersCount;
     /**
      * @dev Maps index to owner bytes, used to idenfitied owners via a uint256 index.
      *
@@ -23,12 +23,12 @@ struct MultiOwnableStorage {
      * The design allows for future expansion to support other types of owners,
      * such as public keys (64 bytes).
      */
-    mapping(uint256 index => bytes owner) ownerAtIndex;
+    mapping(uint256 index => bytes owner) s_ownerAtIndex;
     /**
      * @dev Mapping of bytes to booleans indicating whether or not
      * bytes_ is an owner of this contract.
      */
-    mapping(bytes bytes_ => bool isOwner_) isOwner;
+    mapping(bytes bytes_ => bool isOwner_) s_isOwner;
 }
 
 /**
@@ -110,7 +110,7 @@ contract MultiOwnable {
      * @param owner The owner address.
      */
     function addOwnerAddress(address owner) external virtual onlyOwnerOrEntryPoint {
-        _addOwnerAtIndex(abi.encode(owner), _getMultiOwnableStorage().nextOwnerIndex++);
+        _addOwnerAtIndex(abi.encode(owner), _getMultiOwnableStorage().s_nextOwnerIndex++);
     }
 
     /**
@@ -156,7 +156,7 @@ contract MultiOwnable {
      * @return `true` if the account is an owner else `false`.
      */
     function isOwnerAddress(address account) public view virtual returns (bool) {
-        return _getMultiOwnableStorage().isOwner[abi.encode(account)];
+        return _getMultiOwnableStorage().s_isOwner[abi.encode(account)];
     }
 
     /**
@@ -165,7 +165,7 @@ contract MultiOwnable {
      * @return `true` if the account is an owner else `false`.
      */
     function isOwnerBytes(bytes memory account) public view virtual returns (bool) {
-        return _getMultiOwnableStorage().isOwner[account];
+        return _getMultiOwnableStorage().s_isOwner[account];
     }
 
     /**
@@ -174,7 +174,7 @@ contract MultiOwnable {
      * @return The owner bytes (empty if no owner is registered at this `index`).
      */
     function ownerAtIndex(uint256 index) public view virtual returns (bytes memory) {
-        return _getMultiOwnableStorage().ownerAtIndex[index];
+        return _getMultiOwnableStorage().s_ownerAtIndex[index];
     }
 
     /**
@@ -182,7 +182,7 @@ contract MultiOwnable {
      * @return The next index that will be used to add a new owner.
      */
     function nextOwnerIndex() public view virtual returns (uint256) {
-        return _getMultiOwnableStorage().nextOwnerIndex;
+        return _getMultiOwnableStorage().s_nextOwnerIndex;
     }
 
     /**
@@ -191,16 +191,16 @@ contract MultiOwnable {
      */
     function ownerCount() public view virtual returns (uint256) {
         MultiOwnableStorage storage $ = _getMultiOwnableStorage();
-        return $.nextOwnerIndex - $.removedOwnersCount;
+        return $.s_nextOwnerIndex - $.s_removedOwnersCount;
     }
 
     /**
      * @notice Tracks the number of owners removed
-     * @dev Used with `this.nextOwnerIndex` to avoid removing all owners
+     * @dev Used with `this.s_nextOwnerIndex` to avoid removing all owners
      * @return The number of owners that have been removed.
      */
     function removedOwnersCount() public view virtual returns (uint256) {
-        return _getMultiOwnableStorage().removedOwnersCount;
+        return _getMultiOwnableStorage().s_removedOwnersCount;
     }
 
     /**
@@ -217,8 +217,8 @@ contract MultiOwnable {
         }
 
         MultiOwnableStorage storage $ = _getMultiOwnableStorage();
-        $.isOwner[owner] = true;
-        $.ownerAtIndex[index] = owner;
+        $.s_isOwner[owner] = true;
+        $.s_ownerAtIndex[index] = owner;
 
         emit AddOwner(index, owner);
     }
@@ -242,9 +242,9 @@ contract MultiOwnable {
         }
 
         MultiOwnableStorage storage $ = _getMultiOwnableStorage();
-        delete $.isOwner[owner];
-        delete $.ownerAtIndex[index];
-        $.removedOwnersCount++;
+        delete $.s_isOwner[owner];
+        delete $.s_ownerAtIndex[index];
+        $.s_removedOwnersCount++;
 
         emit RemoveOwner(index, owner);
     }

@@ -6,10 +6,10 @@ import { ECDSA } from "@solady/utils/ECDSA.sol";
 
 import { BaseAccount } from "@account-abstraction/core/BaseAccount.sol";
 
-import "@account-abstraction/core/Helpers.sol";
 import { IAccount } from "@account-abstraction/interfaces/IAccount.sol";
 import { IEntryPoint } from "@account-abstraction/interfaces/IEntryPoint.sol";
 import { PackedUserOperation } from "@account-abstraction/interfaces/PackedUserOperation.sol";
+import {SIG_VALIDATION_SUCCESS, SIG_VALIDATION_FAILED} from "@account-abstraction/core/Helpers.sol";
 
 import { IERC1271 } from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
