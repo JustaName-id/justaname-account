@@ -12,7 +12,7 @@ clean  :; forge clean
 # Remove modules
 remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
 
-install :; forge install eth-infinitism/account-abstraction@v0.8.0 --no-commit && forge install vectorized/solady --no-commit && forge install OpenZeppelin/openzeppelin-contracts --no-commit
+install :; forge install eth-infinitism/account-abstraction@v0.8.0 && forge install vectorized/solady && forge install OpenZeppelin/openzeppelin-contracts
 
 # Update Dependencies
 update:; forge update
@@ -28,7 +28,7 @@ format :; forge fmt
 anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
 
 deploy:
-	@forge script script/DeployJustaNameAccount.s.sol:DeployJustaNameAccount $(NETWORK_ARGS)
+	@forge script script/DeployJustanAccount.s.sol:DeployJustanAccount $(NETWORK_ARGS)
 
 NETWORK_ARGS := --rpc-url http://localhost:8545 --account $(LOCAL_ACCOUNT) --broadcast
 
@@ -45,11 +45,11 @@ ifeq ($(findstring --network op-sepolia,$(ARGS)),--network op-sepolia)
 endif
 
 deploy-sepolia:
-	@forge script script/DeployJustaNameAccount.s.sol:DeployJustaNameAccount $(NETWORK_ARGS)
+	@forge script script/DeployJustanAccount.s.sol:DeployJustanAccount $(NETWORK_ARGS)
 
 deploy-base-sepolia:
-	@forge script script/DeployJustaNameAccount.s.sol:DeployJustaNameAccount $(NETWORK_ARGS)
+	@forge script script/DeployJustanAccount.s.sol:DeployJustanAccount $(NETWORK_ARGS)
 
 deploy-op-sepolia:
-	@forge script script/DeployJustaNameAccount.s.sol:DeployJustaNameAccount $(NETWORK_ARGS)
+	@forge script script/DeployJustanAccount.s.sol:DeployJustanAccount $(NETWORK_ARGS)
 

@@ -20,15 +20,10 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 import { MultiOwnable } from "./MultiOwnable.sol";
 
 /**
- * @title JustaNameAccount
+ * @title JustanAccount
  * @notice This contract is to be used via EIP-7702 delegation and supports ERC-4337
  */
-contract JustaNameAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver {
-
-    /**
-     * @notice Thrown if caller is not an owner or the entrypoint.
-     */
-    error JustaNameAccount_NotOwnerOrEntryPoint();
+contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver {
 
     /**
      * @notice The entrypoint used by this account.
@@ -37,7 +32,7 @@ contract JustaNameAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Recei
     IEntryPoint private immutable i_entryPoint;
 
     /**
-     * @notice Initializes the JustaNameAccount contract with the entry point address.
+     * @notice Initializes the JustanAccount contract with the entry point address.
      * @param entryPointAddress The address of the entry point contract.
      */
     constructor(address entryPointAddress) {
@@ -116,11 +111,9 @@ contract JustaNameAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Recei
      * @dev Reverts if the sender is not an owner of the contract or the entrypoint.
      */
     function _checkOwnerOrEntryPoint() internal view virtual override {
-        if ((msg.sender == address(this)) || (msg.sender == address(entryPoint())) || isOwnerAddress(msg.sender)) {
-            return;
+        if (msg.sender != address(entryPoint())) {
+            _checkOwner();
         }
-
-        revert JustaNameAccount_NotOwnerOrEntryPoint();
     }
 
 }

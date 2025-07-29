@@ -2,18 +2,18 @@
 
 pragma solidity ^0.8.4;
 
-import { JustaNameAccount } from "../src/JustaNameAccount.sol";
+import { JustanAccount } from "../src/JustanAccount.sol";
 import { HelperConfig } from "./HelperConfig.s.sol";
 import { Script } from "forge-std/Script.sol";
 
-contract DeployJustaNameAccount is Script {
+contract DeployJustanAccount is Script {
 
-    function run() external returns (JustaNameAccount, HelperConfig.NetworkConfig memory) {
+    function run() external returns (JustanAccount, HelperConfig.NetworkConfig memory) {
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
 
         vm.startBroadcast();
-        JustaNameAccount account = new JustaNameAccount{ salt: 0 }(config.entryPointAddress);
+        JustanAccount account = new JustanAccount{ salt: 0 }(config.entryPointAddress);
         vm.stopBroadcast();
 
         return (account, config);

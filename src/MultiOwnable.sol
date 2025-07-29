@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 /**
  * @notice Storage layout used by this contract.
- * @custom:storage-location erc7201:justaname.storage.MultiOwnable
+ * @custom:storage-location erc7201:justanaccount.storage.MultiOwnable
  */
 struct MultiOwnableStorage {
     /**
@@ -44,6 +44,11 @@ contract MultiOwnable {
     error MultiOwnable_AlreadyOwner(bytes owner);
 
     /**
+     * @notice Thrown when the `msg.sender` is not an owner and is trying to call a privileged function.
+     */
+    error MultiOwnable_Unauthorized();
+
+    /**
      * @notice Thrown when trying to remove an owner from an index that is empty.
      * @param index The targeted index for removal.
      */
@@ -71,11 +76,11 @@ contract MultiOwnable {
     /**
      * @dev Slot for the `MultiOwnableStorage` struct in storage.
      * Computed from
-     * keccak256(abi.encode(uint256(keccak256("justaname.storage.MultiOwnable")) - 1)) & ~bytes32(uint256(0xff))
+     * keccak256(abi.encode(uint256(keccak256("justanaccount.storage.MultiOwnable")) - 1)) & ~bytes32(uint256(0xff))
      * Follows ERC-7201 (see https://eips.ethereum.org/EIPS/eip-7201).
      */
     bytes32 private constant MULTI_OWNABLE_STORAGE_LOCATION =
-        0x1860bbcd4070722545f3d4c498700ae30fda21f6bf1050d72d704cd0bd2cc100;
+        0x548403af3b7bfc881040446090ff025838396ebf051dc219a19859cf4ef8e800;
 
     /**
      * @notice Emitted when a new owner is registered.
@@ -247,6 +252,18 @@ contract MultiOwnable {
         $.s_removedOwnersCount++;
 
         emit RemoveOwner(index, owner);
+    }
+
+    /**
+     * @notice Checks if the sender is an owner of this contract or the contract itself.
+     * @dev Revert if the sender is not an owner fo the contract itself.
+     */
+    function _checkOwner() internal view virtual {
+        if (isOwnerAddress(msg.sender) || (msg.sender == address(this))) {
+            return;
+        }
+
+        revert MultiOwnable_Unauthorized();
     }
 
     /**

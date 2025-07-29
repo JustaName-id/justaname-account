@@ -9,15 +9,15 @@ import { PackedUserOperation } from "@account-abstraction/interfaces/PackedUserO
 import { ERC20Mock } from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import { Test, Vm, console } from "forge-std/Test.sol";
 
-import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { DeployJustanAccount } from "../../script/DeployJustanAccount.s.sol";
 import { CodeConstants, HelperConfig } from "../../script/HelperConfig.s.sol";
 
 import { PreparePackedUserOp } from "../../script/PreparePackedUserOp.s.sol";
-import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
+import { JustanAccount } from "../../src/JustanAccount.sol";
 
 contract Test4337ExecuteFlow is Test, CodeConstants {
 
-    JustaNameAccount public justaNameAccount;
+    JustanAccount public justanAccount;
     HelperConfig public helperConfig;
     ERC20Mock public mockERC20;
     PreparePackedUserOp public preparePackedUserOp;
@@ -25,8 +25,8 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
     HelperConfig.NetworkConfig public networkConfig;
 
     function setUp() public {
-        DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, networkConfig) = deployer.run();
+        DeployJustanAccount deployer = new DeployJustanAccount();
+        (justanAccount, networkConfig) = deployer.run();
 
         mockERC20 = new ERC20Mock();
         preparePackedUserOp = new PreparePackedUserOp();
@@ -41,9 +41,9 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(TEST_ACCOUNT_PRIVATE_KEY, messageHash);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
-        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, signature);
+        bytes4 result = JustanAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, signature);
         assertEq(result, bytes4(0x1626ba7e));
 
         _executeMintOperation(to, amount);
@@ -53,7 +53,7 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
     function _executeMintOperation(address to, uint256 amount) internal {
         bytes memory functionData = abi.encodeWithSelector(mockERC20.mint.selector, TEST_ACCOUNT_ADDRESS, amount);
         bytes memory executeCallData =
-            abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
+            abi.encodeWithSelector(justanAccount.execute.selector, address(mockERC20), 0, functionData);
         (PackedUserOperation memory userOp,) =
             preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 
@@ -74,7 +74,7 @@ contract Test4337ExecuteFlow is Test, CodeConstants {
         calls[0] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: mintData });
         calls[1] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: burnData });
 
-        bytes memory executeBatchCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
+        bytes memory executeBatchCallData = abi.encodeWithSelector(justanAccount.executeBatch.selector, calls);
         (PackedUserOperation memory userOp,) =
             preparePackedUserOp.generateSignedUserOperation(executeBatchCallData, networkConfig.entryPointAddress);
 

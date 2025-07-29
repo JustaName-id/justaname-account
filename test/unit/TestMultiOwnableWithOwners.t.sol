@@ -3,15 +3,15 @@ pragma solidity ^0.8.4;
 
 import { Test, Vm, console } from "forge-std/Test.sol";
 
-import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { DeployJustanAccount } from "../../script/DeployJustanAccount.s.sol";
 import { HelperConfig } from "../../script/HelperConfig.s.sol";
 import { CodeConstants } from "../../script/HelperConfig.s.sol";
-import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
+import { JustanAccount } from "../../src/JustanAccount.sol";
 import { MultiOwnable } from "../../src/MultiOwnable.sol";
 
 contract TestMultiOwnableWithOwners is Test, CodeConstants {
 
-    JustaNameAccount public justaNameAccount;
+    JustanAccount public justanAccount;
     HelperConfig public helperConfig;
     HelperConfig.NetworkConfig public networkConfig;
 
@@ -19,60 +19,60 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
     uint256 public INITIAL_OWNER_PK;
 
     function setUp() public {
-        DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, networkConfig) = deployer.run();
+        DeployJustanAccount deployer = new DeployJustanAccount();
+        (justanAccount, networkConfig) = deployer.run();
 
         (INITIAL_OWNER, INITIAL_OWNER_PK) = makeAddrAndKey("INITIAL_OWNER");
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(INITIAL_OWNER);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(INITIAL_OWNER);
     }
 
     /*//////////////////////////////////////////////////////////////
                         INITIAL OWNERSHIP CHECK TESTS
     //////////////////////////////////////////////////////////////*/
     function test_ShouldReturnTrueForOwnerAddress() public view {
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(INITIAL_OWNER));
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(INITIAL_OWNER));
     }
 
     function test_ShouldReturnFalseForNonOwnerAddress(address nonOwner) public view {
         vm.assume(nonOwner != INITIAL_OWNER);
 
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(nonOwner));
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(nonOwner));
     }
 
     function test_ShouldReturnTrueForOwnerBytes() public view {
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerBytes(abi.encode(INITIAL_OWNER)));
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerBytes(abi.encode(INITIAL_OWNER)));
     }
 
     function test_ShouldReturnFalseForNonOwnerBytes(address nonOwner) public view {
         vm.assume(nonOwner != INITIAL_OWNER);
 
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerBytes(abi.encode(nonOwner)));
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerBytes(abi.encode(nonOwner)));
     }
 
     function test_ShouldReturnCorrectOwnerAtIndex() public view {
-        bytes memory ownerBytes = JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerAtIndex(0);
+        bytes memory ownerBytes = JustanAccount(TEST_ACCOUNT_ADDRESS).ownerAtIndex(0);
         assertEq(ownerBytes, abi.encode(INITIAL_OWNER));
     }
 
     function test_ShouldReturnEmptyBytesForEmptyIndex() public view {
-        bytes memory ownerBytes = JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerAtIndex(5);
+        bytes memory ownerBytes = JustanAccount(TEST_ACCOUNT_ADDRESS).ownerAtIndex(5);
         assertEq(ownerBytes.length, 0);
     }
 
     function test_ShouldReturnCorrectNextOwnerIndex() public view {
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).nextOwnerIndex(), 1);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).nextOwnerIndex(), 1);
     }
 
     function test_ShouldReturnCorrectOwnerCount() public view {
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
     }
 
     function test_ShouldReturnZeroRemovedOwnersCount() public view {
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 0);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 0);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -86,12 +86,12 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         emit MultiOwnable.AddOwner(1, abi.encode(owner));
 
         vm.prank(INITIAL_OWNER);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).nextOwnerIndex(), 2);
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerAtIndex(1), abi.encode(owner));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).nextOwnerIndex(), 2);
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerAtIndex(1), abi.encode(owner));
     }
 
     function test_ThrowErrorIfAddingDuplicateOwnerAddress() public {
@@ -99,7 +99,7 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.expectRevert(
             abi.encodeWithSelector(MultiOwnable.MultiOwnable_AlreadyOwner.selector, abi.encode(INITIAL_OWNER))
         );
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(INITIAL_OWNER);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(INITIAL_OWNER);
     }
 
     function test_ThrowErrorIfNonOwnerAddsOwnerAddress(address nonOwner) public {
@@ -109,8 +109,8 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.assume(nonOwner != address(networkConfig.entryPointAddress));
 
         vm.prank(nonOwner);
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(nonOwner);
+        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_Unauthorized.selector));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(nonOwner);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -121,23 +121,23 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.assume(owner != address(0));
 
         vm.prank(INITIAL_OWNER);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
 
         vm.expectEmit(true, false, false, false, TEST_ACCOUNT_ADDRESS);
         emit MultiOwnable.RemoveOwner(0, abi.encode(INITIAL_OWNER));
 
         vm.prank(owner);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(INITIAL_OWNER));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(INITIAL_OWNER));
 
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(INITIAL_OWNER));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(INITIAL_OWNER));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
     }
 
     function test_ThrowErrorIfRemovingLastOwner() public {
         vm.prank(INITIAL_OWNER);
         vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_LastOwner.selector));
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(INITIAL_OWNER));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(INITIAL_OWNER));
     }
 
     function test_ThrowErrorIfRemovingOwnerFromEmptyIndex(address owner) public {
@@ -145,11 +145,11 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.assume(owner != address(0));
 
         vm.prank(INITIAL_OWNER);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
 
         vm.prank(INITIAL_OWNER);
         vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_NoOwnerAtIndex.selector, 5));
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(5, abi.encode(owner));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(5, abi.encode(owner));
     }
 
     function test_ThrowErrorIfWrongOwnerAtIndex(address owner) public {
@@ -157,7 +157,7 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.assume(owner != address(0));
 
         vm.prank(INITIAL_OWNER);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
 
         vm.prank(owner);
         vm.expectRevert(
@@ -165,7 +165,7 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
                 MultiOwnable.MultiOwnable_WrongOwnerAtIndex.selector, 0, abi.encode(owner), abi.encode(INITIAL_OWNER)
             )
         );
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(owner));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(owner));
     }
 
     function test_ThrowErrorIfNonOwnerRemovesOwner(address nonOwner) public {
@@ -175,8 +175,8 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.assume(nonOwner != address(networkConfig.entryPointAddress));
 
         vm.prank(nonOwner);
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(INITIAL_OWNER));
+        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_Unauthorized.selector));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(0, abi.encode(INITIAL_OWNER));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -184,11 +184,11 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
     //////////////////////////////////////////////////////////////*/
     function test_ShouldRemoveLastOwnerCorrectly() public {
         vm.prank(INITIAL_OWNER);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeLastOwner(0, abi.encode(INITIAL_OWNER));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeLastOwner(0, abi.encode(INITIAL_OWNER));
 
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(INITIAL_OWNER));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 0);
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(INITIAL_OWNER));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 0);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
     }
 
     function test_ThrowErrorIfRemoveLastOwnerWithMultipleOwners(address owner) public {
@@ -196,11 +196,11 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
         vm.assume(owner != address(0));
 
         vm.prank(INITIAL_OWNER);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner);
 
         vm.prank(INITIAL_OWNER);
         vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_NotLastOwner.selector, 2));
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeLastOwner(0, abi.encode(INITIAL_OWNER));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeLastOwner(0, abi.encode(INITIAL_OWNER));
     }
 
 }
