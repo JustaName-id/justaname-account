@@ -38,7 +38,7 @@ The primary account contract that inherits from:
 
 A separate contract that provides multi-owner functionality with:
 
-- ERC-7201 Namespaced Storage: Prevents storage collisions using the storage slot 0x1860bbcd4070722545f3d4c498700ae30fda21f6bf1050d72d704cd0bd2cc100
+- ERC-7201 Namespaced Storage: Prevents storage collisions using the storage slot 0x548403af3b7bfc881040446090ff025838396ebf051dc219a19859cf4ef8e800
 - Flexible Owner Types: Stores owners as bytes to support future expansion beyond Ethereum addresses
 - Index-based Management: Efficient owner tracking and removal using indices
 
