@@ -8,15 +8,15 @@ import { PackedUserOperation } from "@account-abstraction/interfaces/PackedUserO
 import { ERC20Mock } from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import { Test, Vm, console } from "forge-std/Test.sol";
 
-import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { DeployJustanAccount } from "../../script/DeployJustanAccount.s.sol";
 import { CodeConstants, HelperConfig } from "../../script/HelperConfig.s.sol";
 
 import { PreparePackedUserOp } from "../../script/PreparePackedUserOp.s.sol";
-import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
+import { JustanAccount } from "../../src/JustanAccount.sol";
 
-contract Test4337JustaNameAccount is Test, CodeConstants {
+contract Test4337JustanAccount is Test, CodeConstants {
 
-    JustaNameAccount public justaNameAccount;
+    JustanAccount public justanAccount;
     HelperConfig public helperConfig;
     ERC20Mock public mockERC20;
     PreparePackedUserOp public preparePackedUserOp;
@@ -24,8 +24,8 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
     HelperConfig.NetworkConfig public networkConfig;
 
     function setUp() public {
-        DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, networkConfig) = deployer.run();
+        DeployJustanAccount deployer = new DeployJustanAccount();
+        (justanAccount, networkConfig) = deployer.run();
 
         mockERC20 = new ERC20Mock();
         preparePackedUserOp = new PreparePackedUserOp();
@@ -44,25 +44,25 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         vm.assume(sender != networkConfig.entryPointAddress);
         vm.assume(sender != address(0));
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         (PackedUserOperation memory userOp, bytes32 userOpHash) =
             preparePackedUserOp.generateSignedUserOperation(callData, networkConfig.entryPointAddress);
 
         vm.prank(sender);
         vm.expectRevert("account: not from EntryPoint");
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).validateUserOp(userOp, userOpHash, missingAccountFunds);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).validateUserOp(userOp, userOpHash, missingAccountFunds);
     }
 
     // TODO: test the payPrefund function
     function test_ShouldValidateUserOpCorrectly(bytes memory callData) public {
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         (PackedUserOperation memory userOp, bytes32 userOpHash) =
             preparePackedUserOp.generateSignedUserOperation(callData, networkConfig.entryPointAddress);
 
         vm.prank(networkConfig.entryPointAddress);
-        uint256 validationData = JustaNameAccount(TEST_ACCOUNT_ADDRESS).validateUserOp(userOp, userOpHash, 0);
+        uint256 validationData = JustanAccount(TEST_ACCOUNT_ADDRESS).validateUserOp(userOp, userOpHash, 0);
 
         assertEq(validationData, SIG_VALIDATION_SUCCESS);
     }
@@ -76,12 +76,12 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
 
         vm.deal(TEST_ACCOUNT_ADDRESS, 10 ether);
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         bytes memory functionData =
             abi.encodeWithSelector(mockERC20.mint.selector, address(TEST_ACCOUNT_ADDRESS), amount);
         bytes memory executeCallData =
-            abi.encodeWithSelector(justaNameAccount.execute.selector, address(mockERC20), 0, functionData);
+            abi.encodeWithSelector(justanAccount.execute.selector, address(mockERC20), 0, functionData);
         (PackedUserOperation memory userOp,) =
             preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 
@@ -103,7 +103,7 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
 
         vm.deal(TEST_ACCOUNT_ADDRESS, 10 ether);
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         bytes memory functionata1 = abi.encodeCall(mockERC20.mint, (TEST_ACCOUNT_ADDRESS, amount));
         bytes memory functionData2 = abi.encodeCall(mockERC20.burn, (TEST_ACCOUNT_ADDRESS, amount));
@@ -112,7 +112,7 @@ contract Test4337JustaNameAccount is Test, CodeConstants {
         calls[0] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: functionata1 });
         calls[1] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: functionData2 });
 
-        bytes memory executeCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
+        bytes memory executeCallData = abi.encodeWithSelector(justanAccount.executeBatch.selector, calls);
         (PackedUserOperation memory userOp,) =
             preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 

@@ -10,23 +10,23 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { Test, Vm, console } from "forge-std/Test.sol";
 
-import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { DeployJustanAccount } from "../../script/DeployJustanAccount.s.sol";
 import { HelperConfig } from "../../script/HelperConfig.s.sol";
 import { CodeConstants } from "../../script/HelperConfig.s.sol";
-import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
+import { JustanAccount } from "../../src/JustanAccount.sol";
 import { MultiOwnable } from "../../src/MultiOwnable.sol";
 
-contract Test7702JustaNameAccount is Test, CodeConstants {
+contract Test7702JustanAccount is Test, CodeConstants {
 
-    JustaNameAccount public justaNameAccount;
+    JustanAccount public justanAccount;
     HelperConfig public helperConfig;
     ERC20Mock public mockERC20;
 
     HelperConfig.NetworkConfig public networkConfig;
 
     function setUp() public {
-        DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, networkConfig) = deployer.run();
+        DeployJustanAccount deployer = new DeployJustanAccount();
+        (justanAccount, networkConfig) = deployer.run();
 
         mockERC20 = new ERC20Mock();
     }
@@ -41,8 +41,8 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
     )
         public
     {
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
-        justaNameAccount.execute(target, value, data);
+        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_Unauthorized.selector));
+        justanAccount.execute(target, value, data);
     }
 
     function test_ShouldExecuteCorrectly(address to, uint256 amount) public {
@@ -50,9 +50,9 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
 
         bytes memory data = abi.encodeCall(ERC20Mock.mint, (to, amount));
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
         vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).execute(address(mockERC20), 0, data);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).execute(address(mockERC20), 0, data);
 
         assertEq(mockERC20.balanceOf(to), amount);
     }
@@ -63,12 +63,12 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
         bytes memory data = abi.encodeCall(ERC20Mock.mint, (BOB_ADDRESS, amount));
 
         Vm.SignedDelegation memory signedDelegation =
-            vm.signDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+            vm.signDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         vm.broadcast(BOB_PK);
         vm.attachDelegation(signedDelegation);
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).execute(address(mockERC20), 0, data);
+        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_Unauthorized.selector));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).execute(address(mockERC20), 0, data);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -86,8 +86,8 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
         BaseAccount.Call[] memory calls = new BaseAccount.Call[](1);
         calls[0] = BaseAccount.Call({ target: target, value: value, data: data });
 
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
-        justaNameAccount.executeBatch(calls);
+        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_Unauthorized.selector));
+        justanAccount.executeBatch(calls);
     }
 
     function test_ShouldExecuteBatchCorrectly(address to, uint256 amount) public {
@@ -100,9 +100,9 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
         calls[0] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: data1 });
         calls[1] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: data2 });
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
         vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).executeBatch(calls);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).executeBatch(calls);
 
         assertEq(mockERC20.balanceOf(to), 0);
     }
@@ -120,12 +120,12 @@ contract Test7702JustaNameAccount is Test, CodeConstants {
         calls[1] = BaseAccount.Call({ target: address(mockERC20), value: 0, data: data2 });
 
         Vm.SignedDelegation memory signedDelegation =
-            vm.signDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+            vm.signDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         vm.broadcast(BOB_PK);
         vm.attachDelegation(signedDelegation);
-        vm.expectRevert(abi.encodeWithSelector(JustaNameAccount.JustaNameAccount_NotOwnerOrEntryPoint.selector));
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).executeBatch(calls);
+        vm.expectRevert(abi.encodeWithSelector(MultiOwnable.MultiOwnable_Unauthorized.selector));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).executeBatch(calls);
     }
 
 }

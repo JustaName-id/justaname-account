@@ -13,10 +13,10 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { Test, Vm, console } from "forge-std/Test.sol";
 
-import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { DeployJustanAccount } from "../../script/DeployJustanAccount.s.sol";
 import { HelperConfig } from "../../script/HelperConfig.s.sol";
 import { CodeConstants } from "../../script/HelperConfig.s.sol";
-import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
+import { JustanAccount } from "../../src/JustanAccount.sol";
 
 contract ERC721Mock is ERC721 {
 
@@ -38,9 +38,9 @@ contract ERC1155Mock is ERC1155 {
 
 }
 
-contract TestGeneralJustaNameAccount is Test, CodeConstants {
+contract TestGeneralJustanAccount is Test, CodeConstants {
 
-    JustaNameAccount public justaNameAccount;
+    JustanAccount public justanAccount;
     HelperConfig public helperConfig;
 
     ERC721Mock public erc721Mock;
@@ -51,8 +51,8 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     address public NFT_OWNER;
 
     function setUp() public {
-        DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, networkConfig) = deployer.run();
+        DeployJustanAccount deployer = new DeployJustanAccount();
+        (justanAccount, networkConfig) = deployer.run();
 
         NFT_OWNER = makeAddr("nft_owner");
 
@@ -64,16 +64,16 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
                           ENTRYPOINT TESTS
     //////////////////////////////////////////////////////////////*/
     function test_ShouldReturnCorrectEntryPoint() public view {
-        address _entryPoint = address(justaNameAccount.entryPoint());
+        address _entryPoint = address(justanAccount.entryPoint());
         assertEq(_entryPoint, networkConfig.entryPointAddress);
     }
 
     function test_ShouldReturnTrueIfCorrectInterface() public view {
-        assertTrue(justaNameAccount.supportsInterface(type(IAccount).interfaceId));
-        assertTrue(justaNameAccount.supportsInterface(type(IERC165).interfaceId));
-        assertTrue(justaNameAccount.supportsInterface(type(IERC1271).interfaceId));
-        assertTrue(justaNameAccount.supportsInterface(type(IERC721Receiver).interfaceId));
-        assertTrue(justaNameAccount.supportsInterface(type(IERC1155Receiver).interfaceId));
+        assertTrue(justanAccount.supportsInterface(type(IAccount).interfaceId));
+        assertTrue(justanAccount.supportsInterface(type(IERC165).interfaceId));
+        assertTrue(justanAccount.supportsInterface(type(IERC1271).interfaceId));
+        assertTrue(justanAccount.supportsInterface(type(IERC721Receiver).interfaceId));
+        assertTrue(justanAccount.supportsInterface(type(IERC1155Receiver).interfaceId));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         vm.assume(_interfaceId != type(IERC721Receiver).interfaceId);
         vm.assume(_interfaceId != type(IERC1155Receiver).interfaceId);
 
-        assertFalse(justaNameAccount.supportsInterface(_interfaceId));
+        assertFalse(justanAccount.supportsInterface(_interfaceId));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -97,8 +97,8 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(alicePk, messageHash);
         bytes memory badSignature = abi.encodePacked(r, s, v);
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
-        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, badSignature);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        bytes4 result = JustanAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, badSignature);
         assertEq(result, bytes4(0xffffffff));
     }
 
@@ -106,8 +106,8 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(TEST_ACCOUNT_PRIVATE_KEY, messageHash);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
-        bytes4 result = JustaNameAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, signature);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        bytes4 result = JustanAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, signature);
         assertEq(result, bytes4(0x1626ba7e));
     }
 
@@ -115,7 +115,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
                             RECEIVER TESTS
     //////////////////////////////////////////////////////////////*/
     function test_ShouldReceiveERC721Correctly(uint256 tokenId) public {
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         erc721Mock.mint(NFT_OWNER, tokenId);
 
@@ -134,7 +134,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
     }
 
     function test_ShouldReceiveERC1155Correctly(uint256 tokenId, uint256 amount) public {
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         erc1155Mock.mint(NFT_OWNER, tokenId, amount, bytes(""));
 
@@ -155,7 +155,7 @@ contract TestGeneralJustaNameAccount is Test, CodeConstants {
 
         vm.deal(sender, amount);
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
 
         vm.prank(sender);
         (bool success,) = payable(TEST_ACCOUNT_ADDRESS).call{ value: amount }("");

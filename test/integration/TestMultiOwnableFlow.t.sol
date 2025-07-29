@@ -9,26 +9,26 @@ import { PackedUserOperation } from "@account-abstraction/interfaces/PackedUserO
 import { ERC20Mock } from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import { Test, Vm, console } from "forge-std/Test.sol";
 
-import { DeployJustaNameAccount } from "../../script/DeployJustaNameAccount.s.sol";
+import { DeployJustanAccount } from "../../script/DeployJustanAccount.s.sol";
 import { CodeConstants, HelperConfig } from "../../script/HelperConfig.s.sol";
 
 import { PreparePackedUserOp } from "../../script/PreparePackedUserOp.s.sol";
-import { JustaNameAccount } from "../../src/JustaNameAccount.sol";
+import { JustanAccount } from "../../src/JustanAccount.sol";
 import { MultiOwnable } from "../../src/MultiOwnable.sol";
 
 contract TestMultiOwnableFlow is Test, CodeConstants {
 
-    JustaNameAccount public justaNameAccount;
+    JustanAccount public justanAccount;
     HelperConfig public helperConfig;
     HelperConfig.NetworkConfig public networkConfig;
     PreparePackedUserOp public preparePackedUserOp;
 
     function setUp() public {
-        DeployJustaNameAccount deployer = new DeployJustaNameAccount();
-        (justaNameAccount, networkConfig) = deployer.run();
+        DeployJustanAccount deployer = new DeployJustanAccount();
+        (justanAccount, networkConfig) = deployer.run();
         preparePackedUserOp = new PreparePackedUserOp();
 
-        vm.signAndAttachDelegation(address(justaNameAccount), TEST_ACCOUNT_PRIVATE_KEY);
+        vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
     }
 
     function test_ShouldChangeOwnershipCorrectlyWith7702(address owner1, address owner2, address owner3) public {
@@ -42,45 +42,45 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         vm.assume(owner2 != TEST_ACCOUNT_ADDRESS);
         vm.assume(owner3 != TEST_ACCOUNT_ADDRESS);
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 0);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 0);
 
         vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1);
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner1));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner1));
 
         vm.prank(owner1);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2);
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner2));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner2));
 
         vm.prank(owner2);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner3);
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner3);
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 3);
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner3));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 3);
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner3));
 
         vm.prank(owner3);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(2, abi.encode(owner3));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(2, abi.encode(owner3));
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner3));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 2);
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner3));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 1);
 
         vm.prank(owner1);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(1, abi.encode(owner2));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeOwnerAtIndex(1, abi.encode(owner2));
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner2));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 2);
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner2));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).removedOwnersCount(), 2);
 
         vm.prank(TEST_ACCOUNT_ADDRESS);
-        JustaNameAccount(TEST_ACCOUNT_ADDRESS).removeLastOwner(0, abi.encode(owner1));
+        JustanAccount(TEST_ACCOUNT_ADDRESS).removeLastOwner(0, abi.encode(owner1));
 
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 0);
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner1));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 0);
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(owner1));
     }
 
     function test_ShouldChangeOwnershipCorrectlyWith4337(address newOwner1, address newOwner2) public {
@@ -96,7 +96,7 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
 
         bytes memory addOwnerData = abi.encodeWithSelector(MultiOwnable.addOwnerAddress.selector, newOwner1);
         bytes memory executeCallData =
-            abi.encodeWithSelector(justaNameAccount.execute.selector, TEST_ACCOUNT_ADDRESS, 0, addOwnerData);
+            abi.encodeWithSelector(justanAccount.execute.selector, TEST_ACCOUNT_ADDRESS, 0, addOwnerData);
         (PackedUserOperation memory userOp,) =
             preparePackedUserOp.generateSignedUserOperation(executeCallData, networkConfig.entryPointAddress);
 
@@ -106,8 +106,8 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         vm.prank(newOwner1);
         IEntryPoint(networkConfig.entryPointAddress).handleOps(ops, payable(TEST_ACCOUNT_ADDRESS));
 
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner1));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner1));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
 
         bytes memory addSecondOwnerData = abi.encodeWithSelector(MultiOwnable.addOwnerAddress.selector, newOwner2);
         bytes memory removeSecondOwnerData =
@@ -117,7 +117,7 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         calls[0] = BaseAccount.Call({ target: TEST_ACCOUNT_ADDRESS, value: 0, data: addSecondOwnerData });
         calls[1] = BaseAccount.Call({ target: TEST_ACCOUNT_ADDRESS, value: 0, data: removeSecondOwnerData });
 
-        bytes memory executeBatchCallData = abi.encodeWithSelector(justaNameAccount.executeBatch.selector, calls);
+        bytes memory executeBatchCallData = abi.encodeWithSelector(justanAccount.executeBatch.selector, calls);
         (PackedUserOperation memory batchUserOp,) =
             preparePackedUserOp.generateSignedUserOperation(executeBatchCallData, networkConfig.entryPointAddress);
 
@@ -127,9 +127,9 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
         vm.prank(newOwner1);
         IEntryPoint(networkConfig.entryPointAddress).handleOps(batchOps, payable(TEST_ACCOUNT_ADDRESS));
 
-        assertFalse(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner2));
-        assertEq(JustaNameAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
-        assertTrue(JustaNameAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner1));
+        assertFalse(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner2));
+        assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 1);
+        assertTrue(JustanAccount(TEST_ACCOUNT_ADDRESS).isOwnerAddress(newOwner1));
     }
 
 }

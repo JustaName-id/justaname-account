@@ -1,8 +1,8 @@
-# JustaNameAccount
+# JustanAccount
 
 ## Overview
 
-The `JustaNameAccount` is a Solidity smart contract designed to enhance Ethereum account functionalities by integrating support for EIP-7702 and EIP-4337. These integrations enable features such as transaction batching, gas fee sponsorship, and advanced signature validation...
+The `JustanAccount` is a Solidity smart contract designed to enhance Ethereum account functionalities by integrating support for EIP-7702 and EIP-4337. These integrations enable features such as transaction batching, gas fee sponsorship, and advanced signature validation...
 
 ## Features
 
@@ -17,7 +17,7 @@ The `JustaNameAccount` is a Solidity smart contract designed to enhance Ethereum
 
 The contract consists of two main components:
 
-### JustaNameAccount (Main Contract)
+### JustanAccount (Main Contract)
 
 The primary account contract that inherits from:
 
@@ -57,6 +57,6 @@ A separate contract that provides multi-owner functionality with:
 The contract uses ERC-7201 namespaced storage to prevent collisions:
 
 ```solidity
-// Storage slot: keccak256(abi.encode(uint256(keccak256("justaname.storage.MultiOwnable")) - 1)) & ~bytes32(uint256(0xff))
-bytes32 private constant MULTI_OWNABLE_STORAGE_LOCATION = 0x1860bbcd4070722545f3d4c498700ae30fda21f6bf1050d72d704cd0bd2cc100;
+// Storage slot: keccak256(abi.encode(uint256(keccak256("justanaccount.storage.MultiOwnable")) - 1)) & ~bytes32(uint256(0xff))
+bytes32 private constant MULTI_OWNABLE_STORAGE_LOCATION = 0x548403af3b7bfc881040446090ff025838396ebf051dc219a19859cf4ef8e800;
 ```
