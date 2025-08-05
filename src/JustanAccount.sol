@@ -3,16 +3,16 @@ pragma solidity ^0.8.4;
 
 import { Receiver } from "@solady/accounts/Receiver.sol";
 import { ECDSA } from "@solady/utils/ECDSA.sol";
+import { LibBit } from "solady/utils/LibBit.sol";
+import { WebAuthn } from "solady/utils/WebAuthn.sol";
 
 import { BaseAccount } from "@account-abstraction/core/BaseAccount.sol";
-
 import { SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS } from "@account-abstraction/core/Helpers.sol";
 import { IAccount } from "@account-abstraction/interfaces/IAccount.sol";
 import { IEntryPoint } from "@account-abstraction/interfaces/IEntryPoint.sol";
 import { PackedUserOperation } from "@account-abstraction/interfaces/PackedUserOperation.sol";
 
 import { IERC1271 } from "@openzeppelin/contracts/interfaces/IERC1271.sol";
-
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -95,8 +95,74 @@ contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver
      * @dev Checks whether the recovered address is equal to the account address or is an owner of this account.
      */
     function _checkSignature(bytes32 hash, bytes calldata signature) internal view returns (bool) {
-        address recovered = ECDSA.tryRecoverCalldata(hash, signature);
-        return (recovered != address(0) && (recovered == address(this) || isOwnerAddress(recovered)));
+        if (LibBit.or(signature.length == 64, signature.length == 65)) {
+            address recovered = ECDSA.tryRecoverCalldata(hash, signature);
+            return (recovered != address(0) && (recovered == address(this) || isOwnerAddress(recovered)));
+        }
+
+        return _checkWebAuthnSignature(hash, signature);
+    }
+
+    /**
+     * @notice Validates WebAuthn signature against all registered WebAuthn public keys.
+     * @param hash The hash to verify.
+     * @param signature The WebAuthn signature data.
+     * @return True if signature is valid for any registered WebAuthn key.
+     */
+    function _checkWebAuthnSignature(bytes32 hash, bytes calldata signature) internal view returns (bool) {
+        uint256 nextIndex = nextOwnerIndex();
+
+        if (nextIndex == 0) {
+            return false; // No owners registered
+        }
+
+        // Get all owners and check WebAuthn keys (64-byte public keys)
+        for (uint256 i = 0; i < nextIndex; i++) {
+            bytes memory ownerBytes = ownerAtIndex(i);
+
+            // Skip if not a WebAuthn key (64 bytes) or if owner was removed
+            if (ownerBytes.length != 64 || !isOwnerBytes(ownerBytes)) {
+                continue;
+            }
+
+            // Decode public key coordinates
+            (bytes32 x, bytes32 y) = abi.decode(ownerBytes, (bytes32, bytes32));
+
+            // Verify WebAuthn signature
+            if (_verifyWebAuthnSignature(hash, signature, x, y)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @notice Verifies a single WebAuthn signature.
+     * @param hash The hash to verify.
+     * @param signature The WebAuthn signature data.
+     * @param x The public key x coordinate.
+     * @param y The public key y coordinate.
+     * @return True if signature is valid.
+     */
+    function _verifyWebAuthnSignature(
+        bytes32 hash,
+        bytes calldata signature,
+        bytes32 x,
+        bytes32 y
+    )
+        internal
+        view
+        returns (bool)
+    {
+        // Use Solady's WebAuthn verification exactly like in the reference
+        return WebAuthn.verify(
+            abi.encode(hash), // Challenge
+            false,
+            WebAuthn.tryDecodeAuth(signature), // Decode auth data from signature
+            x,
+            y
+        );
     }
 
     /**

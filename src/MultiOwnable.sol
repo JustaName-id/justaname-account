@@ -119,6 +119,15 @@ contract MultiOwnable {
     }
 
     /**
+     * @notice Adds a new public-key owner.
+     * @param x The owner public key x coordinate.
+     * @param y The owner public key y coordinate.
+     */
+    function addOwnerPublicKey(bytes32 x, bytes32 y) external virtual onlyOwnerOrEntryPoint {
+        _addOwnerAtIndex(abi.encode(x, y), _getMultiOwnableStorage().s_nextOwnerIndex++);
+    }
+
+    /**
      * @notice Removes owner at the given `index`.
      *
      * @dev Reverts if the owner is not registered at `index`.
@@ -162,6 +171,16 @@ contract MultiOwnable {
      */
     function isOwnerAddress(address account) public view virtual returns (bool) {
         return _getMultiOwnableStorage().s_isOwner[abi.encode(account)];
+    }
+
+    /**
+     * @notice Checks if the given `x`, `y` public key is registered as owner.
+     * @param x The public key x coordinate.
+     * @param y The public key y coordinate.
+     * @return `true` if the public key is an owner else `false`.
+     */
+    function isOwnerPublicKey(bytes32 x, bytes32 y) public view virtual returns (bool) {
+        return _getMultiOwnableStorage().s_isOwner[abi.encode(x, y)];
     }
 
     /**
