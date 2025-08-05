@@ -25,7 +25,7 @@ contract TestMultiOwnableFlow is Test, CodeConstants {
 
     function setUp() public {
         DeployJustanAccount deployer = new DeployJustanAccount();
-        (justanAccount, networkConfig) = deployer.run();
+        (justanAccount, , networkConfig) = deployer.run();
         preparePackedUserOp = new PreparePackedUserOp();
 
         vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);

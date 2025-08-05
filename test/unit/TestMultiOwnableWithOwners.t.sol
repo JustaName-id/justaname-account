@@ -20,7 +20,7 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
 
     function setUp() public {
         DeployJustanAccount deployer = new DeployJustanAccount();
-        (justanAccount, networkConfig) = deployer.run();
+        (justanAccount, ,networkConfig) = deployer.run();
 
         (INITIAL_OWNER, INITIAL_OWNER_PK) = makeAddrAndKey("INITIAL_OWNER");
 

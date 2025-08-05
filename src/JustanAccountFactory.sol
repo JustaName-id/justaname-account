@@ -10,7 +10,7 @@ contract JustanAccountFactory {
     /**
      * Address of the JustanAccount implementation used as implementation for new accounts.
      */
-    address public immutable i_implementation;
+    address private immutable i_implementation;
 
     /**
      * @notice Thrown when trying to create a new account without any owner.
@@ -59,13 +59,12 @@ contract JustanAccountFactory {
         }
     }
 
-
     /**
      * @notice Returns the deterministic address of the account that would be created by `createAccount`.
-     * 
+     *
      * @param owners Array of initial owners. Each item should be an ABI encoded address or 64 byte public key.
      * @param nonce  The nonce provided to `createAccount()`.
-     * 
+     *
      * @return The predicted account deployment address.
      */
     function getAddress(bytes[] calldata owners, uint256 nonce) external view returns (address) {
@@ -79,6 +78,10 @@ contract JustanAccountFactory {
      */
     function initCodeHash() public view virtual returns (bytes32) {
         return LibClone.initCodeHashERC1967(i_implementation);
+    }
+
+    function getImplementation() external view returns (address) {
+        return i_implementation;
     }
 
     /**
