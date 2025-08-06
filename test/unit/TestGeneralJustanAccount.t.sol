@@ -52,7 +52,7 @@ contract TestGeneralJustanAccount is Test, CodeConstants {
 
     function setUp() public {
         DeployJustanAccount deployer = new DeployJustanAccount();
-        (justanAccount, networkConfig) = deployer.run();
+        (justanAccount,, networkConfig) = deployer.run();
 
         NFT_OWNER = makeAddr("nft_owner");
 
