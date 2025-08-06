@@ -129,9 +129,7 @@ contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver
             (bytes32 x, bytes32 y) = abi.decode(ownerBytes, (bytes32, bytes32));
 
             // Verify WebAuthn signature
-            if (_verifyWebAuthnSignature(hash, signature, x, y)) {
-                return true;
-            }
+            return _verifyWebAuthnSignature(hash, signature, x, y);
         }
 
         return false;
@@ -155,9 +153,8 @@ contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver
         view
         returns (bool)
     {
-        // Use Solady's WebAuthn verification exactly like in the reference
         return WebAuthn.verify(
-            abi.encode(hash), // Challenge
+            abi.encode(hash),
             false,
             WebAuthn.tryDecodeAuth(signature), // Decode auth data from signature
             x,
