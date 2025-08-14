@@ -154,7 +154,7 @@ contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver
         returns (bool)
     {
         return WebAuthn.verify(
-            abi.encode(hash),
+            abi.encode(hash), // Challenge
             false,
             WebAuthn.tryDecodeAuth(signature), // Decode auth data from signature
             x,

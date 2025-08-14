@@ -260,9 +260,9 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
 
         // Add multiple owners
         vm.startPrank(INITIAL_OWNER);
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1);  // index 1
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2);  // index 2
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner3);  // index 3
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1); // index 1
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2); // index 2
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner3); // index 3
         vm.stopPrank();
 
         assertEq(JustanAccount(TEST_ACCOUNT_ADDRESS).ownerCount(), 4);
@@ -299,8 +299,8 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
 
         // Add two more owners
         vm.startPrank(INITIAL_OWNER);
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1);  // index 1
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2);  // index 2
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1); // index 1
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2); // index 2
         vm.stopPrank();
 
         // nextOwnerIndex should be 3 now
@@ -331,9 +331,9 @@ contract TestMultiOwnableWithOwners is Test, CodeConstants {
 
         // Add owners to create indices 0, 1, 2, 3
         vm.startPrank(INITIAL_OWNER);
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1);  // index 1
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2);  // index 2
-        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner3);  // index 3
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner1); // index 1
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner2); // index 2
+        JustanAccount(TEST_ACCOUNT_ADDRESS).addOwnerAddress(owner3); // index 3
         vm.stopPrank();
 
         // Remove owner at index 1, creating a gap

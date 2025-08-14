@@ -121,12 +121,19 @@ contract TestGeneralJustanAccount is Test, CodeConstants {
 
     function test_ShouldRejectInvalidSignatureLength(bytes32 messageHash) public {
         // Test various invalid signature lengths (not 64 or 65 bytes)
-        bytes memory shortSignature = abi.encodePacked(bytes32(0x0000000000000000000000000000000000000000000000000000000000000001), bytes16(0x00000000000000000000000000000002)); // 48 bytes
-        bytes memory longSignature = abi.encodePacked(bytes32(0x0000000000000000000000000000000000000000000000000000000000000001), bytes32(0x0000000000000000000000000000000000000000000000000000000000000002), bytes32(0x0000000000000000000000000000000000000000000000000000000000000003)); // 96 bytes
+        bytes memory shortSignature = abi.encodePacked(
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000001),
+            bytes16(0x00000000000000000000000000000002)
+        ); // 48 bytes
+        bytes memory longSignature = abi.encodePacked(
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000001),
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000002),
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000003)
+        ); // 96 bytes
         bytes memory oneByteSignature = abi.encodePacked(bytes1(0x01)); // 1 byte
 
         vm.signAndAttachDelegation(address(justanAccount), TEST_ACCOUNT_PRIVATE_KEY);
-        
+
         bytes4 result1 = JustanAccount(TEST_ACCOUNT_ADDRESS).isValidSignature(messageHash, shortSignature);
         assertEq(result1, bytes4(0xffffffff));
 
@@ -140,10 +147,10 @@ contract TestGeneralJustanAccount is Test, CodeConstants {
     function test_ShouldHandleOversizedSignature(bytes32 messageHash) public {
         // Create an oversized signature (130 bytes)
         bytes memory oversizedSignature = abi.encodePacked(
-            bytes32(0x0000000000000000000000000000000000000000000000000000000000000001), 
-            bytes32(0x0000000000000000000000000000000000000000000000000000000000000002), 
-            bytes32(0x0000000000000000000000000000000000000000000000000000000000000003), 
-            bytes32(0x0000000000000000000000000000000000000000000000000000000000000004), 
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000001),
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000002),
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000003),
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000004),
             bytes2(0x0005)
         );
 
