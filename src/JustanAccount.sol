@@ -25,6 +25,8 @@ import { MultiOwnable } from "./MultiOwnable.sol";
  */
 contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver {
 
+    error JustanAccount_AlreadyInitialized();
+
     /**
      * @notice The entrypoint used by this account.
      * @dev This is set during the contract deployment and cannot be changed later.
@@ -37,6 +39,11 @@ contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver
      */
     constructor(address entryPointAddress) {
         i_entryPoint = IEntryPoint(entryPointAddress);
+
+        // Implementation should not be initializable (does not affect proxies which use their own storage).
+        bytes[] memory owners = new bytes[](1);
+        owners[0] = abi.encode(address(0));
+        _initializeOwners(owners);
     }
 
     /**
@@ -69,6 +76,21 @@ contract JustanAccount is BaseAccount, MultiOwnable, IERC165, IERC1271, Receiver
     function supportsInterface(bytes4 id) public pure override (IERC165) returns (bool) {
         return id == type(IERC165).interfaceId || id == type(IAccount).interfaceId || id == type(IERC1271).interfaceId
             || id == type(IERC1155Receiver).interfaceId || id == type(IERC721Receiver).interfaceId;
+    }
+
+    /**
+     * @notice Initializes the JustanAccount with the provided owners.
+     * @dev Reverts if the account has had at least one owner, i.e. has been initialized.
+     * @param owners Array of initial owners for this account. Each item should be
+     *               an ABI encoded Ethereum address, i.e. 32 bytes with 12 leading 0 bytes,
+     *               or a 64 byte public key.
+     */
+    function initialize(bytes[] calldata owners) external payable virtual {
+        if (nextOwnerIndex() != 0) {
+            revert JustanAccount_AlreadyInitialized();
+        }
+
+        _initializeOwners(owners);
     }
 
     /**
